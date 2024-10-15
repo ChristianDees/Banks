@@ -1,13 +1,26 @@
-abstract class Account {
-    String name;
+import java.util.Random;
 
-    Account(String name){
-        this.name = name;
+abstract class Account {
+    int accountNumber;
+    double accountBalance;
+
+    // account constructor
+    Account(double amount){
+        this.accountNumber = new Random().nextInt(10000000);
+        this.accountBalance = amount;
     }
 
-    // put money into account
-    abstract void deposit(double amount);
+    // add money to account balance
+    public void deposit(double amount){
+        this.accountBalance += amount;
+    }
 
-    // take money out, return if success
-    abstract boolean withdraw(double amount);
+    // remove money, return success/fail
+    public boolean withdraw(double amount){
+        if (amount <= this.accountBalance && amount > 0){
+            this.accountBalance -= amount;
+            return true;
+        }
+        return false;
+    }
 }

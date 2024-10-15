@@ -1,6 +1,16 @@
 abstract class Person {
-    String name;
-    Person(String name){
-        this.name = name;
+    String firstName;
+    String lastName;
+    int dob;
+
+    // person constructor
+    Person(String firstName, String lastName){
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
+
+    // return first and last name
+    public String getFullName(){
+        return this.firstName + ' ' + this.lastName;
     }
 }
