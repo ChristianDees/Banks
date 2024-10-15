@@ -1,24 +1,24 @@
 import java.util.Random;
 
 abstract class Account {
-    int accountNumber;
-    double accountBalance;
+    int accNum;
+    double balance;
 
     // account constructor
-    Account(double amount){
-        this.accountNumber = new Random().nextInt(10000000);
-        this.accountBalance = amount;
+    Account(int accNum, double startBalance){
+        this.accNum = accNum;
+        this.balance = startBalance;
     }
 
     // add money to account balance
     public void deposit(double amount){
-        this.accountBalance += amount;
+        this.balance += amount;
     }
 
     // remove money, return success/fail
     public boolean withdraw(double amount){
-        if (amount <= this.accountBalance && amount > 0){
-            this.accountBalance -= amount;
+        if (amount <= this.balance && amount > 0){
+            this.balance -= amount;
             return true;
         }
         return false;

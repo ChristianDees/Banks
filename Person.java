@@ -1,7 +1,6 @@
 abstract class Person {
     String firstName;
     String lastName;
-    int dob;
 
     // person constructor
     Person(String firstName, String lastName){

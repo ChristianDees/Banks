@@ -1,8 +1,13 @@
 public class Credit {
-    int CreditAccountNumber;
+    int accNum;
     int creditMax;
     double balance;
 
+    Credit(int accNum, int creditMax, double startBalance){
+        this.accNum = accNum;
+        this.creditMax = creditMax;
+        this.balance = startBalance;
+    }
 
     // return success/fail
     public boolean charge(double amount){
