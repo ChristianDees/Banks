@@ -1,5 +1,3 @@
-import java.util.Random;
-
 abstract class Account {
     int accNum;
     double balance;
@@ -22,5 +20,9 @@ abstract class Account {
             return true;
         }
         return false;
+    }
+
+    public String toString(){
+        return "Account Type: " + this.getClass().getName() + "\nAccount number: " + Integer.toString(this.accNum) + "\nBalance: " + Double.toString(this.balance) + "\n";
     }
 }
