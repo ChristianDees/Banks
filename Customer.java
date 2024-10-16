@@ -1,3 +1,4 @@
+import java.text.NumberFormat;
 import java.util.ArrayList;
 
 class Customer extends Person{
@@ -7,7 +8,6 @@ class Customer extends Person{
     String phoneNum;
     int idNum;
     Credit credit;
-
 
 
     // customer constructor
@@ -23,14 +23,31 @@ class Customer extends Person{
 
     }
 
-
-    // move money from one account to another, return success/fail
-    public boolean transfer(Account src, Account dst, double amount){
-        boolean rc = src.withdraw(amount);
-        if (rc) {
-            dst.deposit(amount);
-            return true;
+    // transfer money ONLY from customer owned accounts
+    public void transfer(Account src, Account dst, double amount){
+        if (this.accounts.contains(src) && this.accounts.contains(dst)){
+            boolean rc = src.withdraw(amount);
+            if (rc){
+                NumberFormat formatter = NumberFormat.getCurrencyInstance();
+                dst.deposit(amount);
+                System.out.println("Transfer Successful.");
+                System.out.println(src.toString());
+                System.out.println(dst.toString());
+            } else {
+                System.out.println("Transfer Failed.");
+            }
         }
-        return false;
+    }
+
+    // transfer money into someone else's account
+    public void send(Account src, Account dst, double amount){
+        boolean rc = src.withdraw(amount);
+        if (rc){
+            dst.deposit(amount);
+            System.out.println("Transfer Successful");
+            System.out.println(src.toString());
+        } else {
+            System.out.println("Transfer Failed.");
+        }
     }
 }
