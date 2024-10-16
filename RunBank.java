@@ -11,8 +11,8 @@ public class RunBank {
     private static boolean exit = false;
 
     public static void loadFromCSV(String filename) {
-        try (Scanner scan = new Scanner(new File(filename))) { // Auto-close the scanner
-            scan.nextLine(); // Skip header
+        try (Scanner scan = new Scanner(new File(filename))) {
+            scan.nextLine();
             while (scan.hasNextLine()) {
                 String[] personInfo = scan.nextLine().split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
                 int idNum = Integer.parseInt(personInfo[0]);
@@ -20,7 +20,7 @@ public class RunBank {
                 String lastName = personInfo[2].toLowerCase();
                 String dob = personInfo[3];
                 String address = personInfo[4].replace("\"", "");
-                String phoneNum = personInfo[5].replaceAll("[()\\s-]", ""); // Use regex for cleanup
+                String phoneNum = personInfo[5].replaceAll("[()\\s-]", "");
                 int checkingAccNum = Integer.parseInt(personInfo[6]);
                 double checkingStartBalance = Double.parseDouble(personInfo[7]);
                 int savingAccNum = Integer.parseInt(personInfo[8]);
