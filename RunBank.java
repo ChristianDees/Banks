@@ -46,6 +46,10 @@ public class RunBank {
         // loop through every customer upon exit, update row with (id, name, date of birth, phone number, Checking Account Number, Checking Starting Balance, Savings Account Number, Savings Starting Balance, Credit Account Number, Credit Max, Credit Starting Balance)
     }
 
+    public static void appendErrorLog(String filename){
+        //
+    }
+
     private static void printHeader(boolean metadata){
         if (metadata) {
             // full header
