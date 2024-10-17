@@ -72,11 +72,11 @@ abstract class Account {
     /**
      * Print attributes of an account
      *
-     * @param printBalance  Print the balance along with other attributes.
+     * @param showBalance  Print the balance along with other attributes.
      **/
-    public void printAccount(boolean printBalance) {
+    public void printAccount(boolean showBalance) {
         NumberFormat formatter = NumberFormat.getCurrencyInstance();
-        if (printBalance) {
+        if (showBalance) {
             System.out.printf("| %-15s | %-20s | %-16s |\n",
                     this.getType(),
                     this.getAccountNumber(),

@@ -4,6 +4,9 @@ import java.util.Scanner;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+/**
+ * Represents the bank running
+ */
 public class RunBank {
     private static final Dictionary<String, Customer> customers = new Hashtable<>();
     private static final Dictionary<Integer, Checking> checkingAccounts = new Hashtable<>();
@@ -11,6 +14,11 @@ public class RunBank {
     private static final Dictionary<Integer, Credit> creditAccounts = new Hashtable<>();
     private static boolean exit = false;
 
+    /**
+     * Load from csv.
+     *
+     * @param filename the filename.
+     */
     public static void loadFromCSV(String filename) {
         try (Scanner scan = new Scanner(new File(filename))) {
             scan.nextLine();
@@ -42,16 +50,31 @@ public class RunBank {
         }
     }
 
+    /**
+     * Update csv.
+     *
+     * @param filename the filename.
+     */
     public static void updateCSV(String filename){
         // loop through every customer upon exit, update row with (id, name, date of birth, phone number, Checking Account Number, Checking Starting Balance, Savings Account Number, Savings Starting Balance, Credit Account Number, Credit Max, Credit Starting Balance)
     }
 
-    public static void appendErrorLog(String filename){
-        //
+    /**
+     * Append error log.
+     *
+     * @param filename the filename.
+     */
+    public static void appendErrorLog(String filename, String errorMsg){
+        // add errorMsg to error log
     }
 
-    private static void printHeader(boolean metadata){
-        if (metadata) {
+    /**
+     * Print header for an account.
+     *
+     * @param showBalance Print balance in header.
+     */
+    private static void printHeader(boolean showBalance){
+        if (showBalance) {
             // full header
             System.out.println("+-----------------+----------------------+------------------+");
             System.out.printf("| %-15s | %-20s | %-16s |\n", "Type", "Account Number", "Balance");
@@ -64,18 +87,30 @@ public class RunBank {
         }
     }
 
-    private static boolean viewAccounts(String name, boolean metadata) {
+    /**
+     * Prints an account's information if it exists.
+     *
+     * @param name          The account owner's id and name.
+     * @param showBalance   Print the balance if true, don't if false.
+     * @return              True or false, if account exists with customer.
+     */
+    private static boolean viewAccounts(String name, boolean showBalance) {
         Customer customer = customers.get(name);
         if (customer == null) {
             System.out.println("That person does not have any accounts with us!");
             return false;
         }
         System.out.println("Accounts:");
-        printHeader(metadata);
-        customer.accounts.forEach(account -> account.printAccount(metadata));
+        printHeader(showBalance);
+        customer.accounts.forEach(account -> account.printAccount(showBalance));
         return true;
     }
 
+    /**
+     * Query for the total transactions the user will perform.
+     *
+     * @param scan          The scanner object to continue taking input.
+     */
     private static void handleCustomer(Scanner scan) {
         int attempts = 0;
         while(attempts < 3){
@@ -98,6 +133,13 @@ public class RunBank {
         System.out.println("Too many attempts. Please log in again.\n");
     }
 
+    /**
+     * Handle a transaction between two accounts.
+     *
+     * @param scan          The scanner object to continue taking input.
+     * @param customerOne   The first customer involved in the transaction.
+     * @param accountOne    The first account associated in the transaction.
+     */
     private static void TwoAccountTransaction(Scanner scan, Customer customerOne, Account accountOne) {
         boolean isTransfer = customerOne != null;
         String customerNametwo = customerOne != null ? customerOne.getFullName(): "";
@@ -136,6 +178,11 @@ public class RunBank {
         }
     }
 
+    /**
+     * Handle a transaction with one account.
+     *
+     * @param scan          The scanner object to continue taking input.
+     */
     private static void oneAccountTransaction(Scanner scan) {
         String name = getUserName(scan, false);
         if (name == null) return;
@@ -145,7 +192,13 @@ public class RunBank {
         performTransaction(scan, account, customer);
     }
 
-    private static String getUserName(Scanner scan, boolean metadata) {
+    /**
+     * Handle a transaction with one account.
+     *
+     * @param scan          The scanner object to continue taking input.
+     * @param showBalance      The
+     */
+    private static String getUserName(Scanner scan, boolean showBalance) {
         for (int attempts = 0; attempts < 3; attempts++) {
             System.out.println("Enter customer id and name (id, name): ");
             String input = scan.nextLine().trim();
@@ -156,13 +209,19 @@ public class RunBank {
                 continue;
             }
             String formattedName = parts[0].trim() + parts[1].trim().toLowerCase().replace(" ", "");
-            if (inquireByName(scan, formattedName, metadata)) {
+            if (inquireByName(scan, formattedName, showBalance)) {
                 return formattedName;
             }
         }
         return null;
     }
 
+    /**
+     * Ask user for an account and return it.
+     *
+     * @param scan          The scanner object to continue taking input.
+     * @param customer      The customer who is answering the question.
+     */
     private static Account getAccountForTransaction(Scanner scan, Customer customer) {
         for (int attempts = 0; attempts < 3; attempts++) {
             System.out.println("Specify the account (type, number):");
@@ -194,12 +253,26 @@ public class RunBank {
         return null;
     }
 
+    /**
+     * Return account from the respective array lists.
+     *
+     * @param accType     The account type the user provided.
+     * @param accNum      The account number the user provided.
+     * @return            The account if it exists.
+     */
     private static Account getAccount(String accType, int accNum) {
         return "checking".equalsIgnoreCase(accType) ? checkingAccounts.get(accNum) :
                 "savings".equalsIgnoreCase(accType) ? savingAccounts.get(accNum) :
                 "credit".equalsIgnoreCase(accType) ? creditAccounts.get(accNum) : null;
     }
 
+    /**
+     * Query the user for their type of transaction and perform it.
+     *
+     * @param scan        The scanner object to continue taking input.
+     * @param account     The account provided to perform an action on.
+     * @param customer    The customer provided to perform an action.
+     */
     private static void performTransaction(Scanner scan, Account account, Customer customer) {
         for (int attempts = 0; attempts < 3; attempts++) {
             System.out.println("Choose an action:\nA. Inquire Account Details\nB. Deposit\nC. Withdraw\nD. Transfer");
@@ -245,6 +318,11 @@ public class RunBank {
         }
     }
 
+    /**
+     * Handle the interaction for a manager.
+     *
+     * @param scan The scanner object to continue taking input.
+     */
     private static void handleManager(Scanner scan) {
         int attempts = 0;
         while(attempts < 3){
@@ -267,10 +345,23 @@ public class RunBank {
         System.out.println("Too many attempts. Please log in again.\n");
     }
 
-    private static boolean inquireByName(Scanner scan, String name, boolean metadata) {
-        return checkExit(name) || viewAccounts(name, metadata);
+    /**
+     * Return account from the respective array lists.
+     *
+     * @param scan          The scanner object to continue taking input.
+     * @param name          The name provided by user (id and name).
+     * @param showBalance   Flag to show balance.
+     * @return              True if provided name is legal.
+     */
+    private static boolean inquireByName(Scanner scan, String name, boolean showBalance) {
+        return checkExit(name) || viewAccounts(name, showBalance);
     }
 
+    /**
+     * Query user for type of account and print the account information.
+     *
+     * @param scan The scanner object to continue taking input.
+     */
     private static void inquireByAccount(Scanner scan) {
         String accType = getAccountType(scan);
         if (accType != null) {
@@ -282,6 +373,12 @@ public class RunBank {
         }
     }
 
+    /**
+     * Query user for the type of account to handle with.
+     *
+     * @param scan          The scanner object to continue taking input.
+     * @return              The account type if it exists.
+     */
     private static String getAccountType(Scanner scan) {
         for (int attempts = 0; attempts < 3; attempts++) {
             System.out.println("What is the account type? (checking/savings/credit):");
@@ -293,12 +390,17 @@ public class RunBank {
         return null;
     }
 
+    /**
+     * Query user for an account number and return the respective account.
+     *
+     * @param scan          The scanner object to continue taking input.
+     * @return              The account that has the provided account type and account number.
+     */
     private static Account getAccountInfo(Scanner scan, String accType) {
         for (int attempts = 0; attempts < 3; attempts++) {
             System.out.println("What is the account number? ");
             String input = scan.nextLine().trim();
             if (checkExit(input)) return null;
-
             try {
                 int accNum = Integer.parseInt(input);
                 Account account = getAccount(accType, accNum);
@@ -314,10 +416,21 @@ public class RunBank {
         return null;
     }
 
+    /**
+     * Determine if input is of 'exit' and set global exit variable.
+     *
+     * @param input         The scanner object to continue taking input.
+     * @return              The status of if the program should be exited.
+     */
     private static boolean checkExit(String input) {
         return input.equalsIgnoreCase("exit") && (exit = true);
     }
 
+    /**
+     * The entry point of application.
+     *
+     * @param args the input arguments
+     */
     public static void main(String[] args) {
         loadFromCSV("bankUsers.csv");
         Scanner scan = new Scanner(System.in);
