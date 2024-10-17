@@ -29,17 +29,17 @@ abstract class Account {
     // add money to account balance
     public void deposit(double amount, boolean suppressSuccess){
         this.balance += amount;
-        if (!suppressSuccess) System.out.println("Deposit Successful.");
+        if (!suppressSuccess) System.out.println("*  *  *  *  *  *  *  Deposit Successful   *  *  *  *  *  *  *\n");
     }
 
     // remove money, return success/fail
     public boolean withdraw(double amount, boolean suppressSuccess){
         if (amount <= this.balance && amount > 0){
             this.balance -= amount;
-            if (!suppressSuccess) System.out.println("Withdraw Successful.");
+            if (!suppressSuccess) System.out.println("*  *  *  *  *  *  *  Withdraw Successful  *  *  *  *  *  *  *\n");
             return true;
         }
-        System.out.println("Insufficient funds.");
+        System.out.println("*  *  *  *  *  *  *  Insufficient Funds   *  *  *  *  *  *  *\n");
         return false;
     }
 
@@ -47,7 +47,7 @@ abstract class Account {
     public void printAccount(boolean allData) {
         NumberFormat formatter = NumberFormat.getCurrencyInstance();
         if (allData) {
-            System.out.printf("| %-15s | %-20s | $%-15s |\n",
+            System.out.printf("| %-15s | %-20s | %-16s |\n",
                     this.getType(),
                     this.getAccountNumber(),
                     formatter.format(this.getBalance()));

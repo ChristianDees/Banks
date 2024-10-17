@@ -7,12 +7,15 @@ public class Credit extends Account{
         this.creditMax = creditMax;
     }
 
-    // return success/fail
-    public boolean charge(double amount){
-        if (amount > 0 && amount <= this.creditMax){
-            this.balance -= amount;
+    // remove money from account
+    public boolean withdraw(double amount, boolean suppressSuccess){
+        double totalCharge = (amount + (0.025*amount)); // AVERAGE TRANSACTION FEE
+        if ((amount > 0) && ((this.balance - totalCharge) <= this.creditMax)) {
+            this.balance -= totalCharge;
+            if (!suppressSuccess) System.out.println("*  *  *  *  *  *  *  Withdraw Successful  *  *  *  *  *  *  *\n");
             return true;
         }
+        System.out.println("*  *  *  *  *  *  *  Insufficient Funds   *  *  *  *  *  *  *\n");
         return false;
     }
 }

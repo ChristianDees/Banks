@@ -27,30 +27,27 @@ class Customer extends Person{
         if (this.accounts.contains(src) && this.accounts.contains(dst)){
             boolean rc = src.withdraw(amount, true);
             if (rc){
-                NumberFormat formatter = NumberFormat.getCurrencyInstance();
                 dst.deposit(amount, true);
-                System.out.println("Transfer Successful.");
-                System.out.println(src.toString());
-                System.out.println(dst.toString());
+                src.printAccount(true);
+                dst.printAccount(true);
+                System.out.println("*  *  *  *  *  *  *  Transfer Successful  *  *  *  *  *  *  *\n");
                 return true;
-            } else {
-                System.out.println("Transfer Failed.");
             }
         }
+        System.out.println("*  *  *  *  *  *  *    Transfer Failed    *  *  *  *  *  *  *\n");
         return false;
     }
 
     // transfer money into someone else's account
-    public boolean send(Account src, Account dst, double amount){
-        boolean rc = src.withdraw(amount, true);
-        if (rc){
+    public boolean send(Account src, Account dst, double amount) {
+        if (src.withdraw(amount, true)) {
             dst.deposit(amount, true);
-            System.out.println("Transfer Successful");
-            System.out.println(src.toString());
+            src.printAccount(true);
+            System.out.println("*  *  *  *  *  *  *    Send Successful    *  *  *  *  *  *  *\n");
             return true;
-        } else {
-            System.out.println("Transfer Failed.");
         }
+        System.out.println("*  *  *  *  *  *  *      Send Failed      *  *  *  *  *  *  *\n");
         return false;
     }
+
 }
