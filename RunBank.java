@@ -181,7 +181,7 @@ public class RunBank {
     /**
      * Handle a transaction with one account.
      *
-     * @param scan          The scanner object to continue taking input.
+     * @param scan         The scanner object to continue taking input.
      */
     private static void oneAccountTransaction(Scanner scan) {
         String name = getUserName(scan, false);
@@ -196,7 +196,7 @@ public class RunBank {
      * Handle a transaction with one account.
      *
      * @param scan          The scanner object to continue taking input.
-     * @param showBalance      The
+     * @param showBalance   Flag to show balance.
      */
     private static String getUserName(Scanner scan, boolean showBalance) {
         for (int attempts = 0; attempts < 3; attempts++) {
