@@ -1,3 +1,7 @@
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.text.NumberFormat;
+
 abstract class Account {
     int accNum;
     double balance;
@@ -10,7 +14,11 @@ abstract class Account {
 
     // getter for balance
     public double getBalance() {
-        return balance;
+        return this.balance;
+    }
+
+    public int getAccountNumber(){
+        return this.accNum;
     }
 
     // getter for type
@@ -19,16 +27,16 @@ abstract class Account {
     }
 
     // add money to account balance
-    public void deposit(double amount){
+    public void deposit(double amount, boolean suppressSuccess){
         this.balance += amount;
-        System.out.println("Deposit Successful.");
+        if (!suppressSuccess) System.out.println("Deposit Successful.");
     }
 
     // remove money, return success/fail
-    public boolean withdraw(double amount){
+    public boolean withdraw(double amount, boolean suppressSuccess){
         if (amount <= this.balance && amount > 0){
             this.balance -= amount;
-            System.out.println("Withdraw Successful.");
+            if (!suppressSuccess) System.out.println("Withdraw Successful.");
             return true;
         }
         System.out.println("Insufficient funds.");
@@ -36,9 +44,22 @@ abstract class Account {
     }
 
     // print attributes
-    public String toString(){
-        return "Account Type: " + this.getType() + "\nAccount number: " + Integer.toString(this.accNum) + "\nBalance: " + Double.toString(this.balance) + "\n";
+    public void printAccount(boolean allData) {
+        NumberFormat formatter = NumberFormat.getCurrencyInstance();
+        if (allData) {
+            System.out.printf("| %-15s | %-20s | $%-15s |\n",
+                    this.getType(),
+                    this.getAccountNumber(),
+                    formatter.format(this.getBalance()));
+            System.out.println("+-----------------+----------------------+------------------+");
+        } else {
+            System.out.printf("| %-15s | %-20s |\n",
+                    this.getType(),
+                    this.getAccountNumber());
+            System.out.println("+-----------------+----------------------+");
+        }
     }
+
 
     @Override
     public boolean equals(Object obj) {

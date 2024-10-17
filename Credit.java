@@ -1,12 +1,10 @@
-public class Credit {
-    int accNum;
+public class Credit extends Account{
     int creditMax;
-    double balance;
 
-    Credit(int accNum, int creditMax, double startBalance){
-        this.accNum = accNum;
+    // credit account constructor
+    Credit(int accNum, double startBalance, int creditMax){
+        super(accNum, startBalance);
         this.creditMax = creditMax;
-        this.balance = startBalance;
     }
 
     // return success/fail
