@@ -60,12 +60,12 @@ public class RunBank {
     }
 
     /**
-     * Append error log.
+     * Append message to a log (txt).
      *
      * @param filename the filename.
      */
-    public static void appendErrorLog(String filename, String errorMsg){
-        // add errorMsg to error log
+    public static void appendLog(String filename, String msg){
+        // add msg to a log
     }
 
     /**
@@ -170,10 +170,10 @@ public class RunBank {
             printHeader(true);
             if (isTransfer) {
                 rc = customerOne.transfer(accountOne, accountTwo, amount);
-                // UPDATE CSV HERE IF RC IS TRUE
+                // UPDATE LOG HERE IF RC IS TRUE
             } else {
                 rc = customerOne.send(accountOne, accountTwo, amount);
-                // UPDATE CSV HERE IF RC IS TRUE
+                // UPDATE LOG HERE IF RC IS TRUE
             }
         }
     }
