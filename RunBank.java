@@ -1,8 +1,8 @@
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Scanner;
-import java.util.Dictionary;
-import java.util.Hashtable;
+import java.io.*;
+import java.util.*;
+import java.io.FileReader;
+
+import org.apache.commons.csv.*;
 
 /**
  * Represents the bank running
@@ -19,44 +19,59 @@ public class RunBank {
      *
      * @param filename the filename.
      */
-    public static void loadFromCSV(String filename) {
+    public static void loadFromCSV(String filename) throws FileNotFoundException {
+
+        String[] HEADERS = new String[0];
         try (Scanner scan = new Scanner(new File(filename))) {
-            scan.nextLine();
-            while (scan.hasNextLine()) {
-                String[] personInfo = scan.nextLine().split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
-                int idNum = Integer.parseInt(personInfo[0]);
-                String firstName = personInfo[1].toLowerCase();
-                String lastName = personInfo[2].toLowerCase();
-                String dob = personInfo[3];
-                String address = personInfo[4].replace("\"", "");
-                String phoneNum = personInfo[5].replaceAll("[()\\s-]", "");
-                int checkingAccNum = Integer.parseInt(personInfo[6]);
-                double checkingStartBalance = Double.parseDouble(personInfo[7]);
-                int savingAccNum = Integer.parseInt(personInfo[8]);
-                double savingStartBalance = Double.parseDouble(personInfo[9]);
-                int creditAccNum = Integer.parseInt(personInfo[10]);
-                int creditMax = Integer.parseInt(personInfo[11]);
-                double creditStartBalance = Double.parseDouble(personInfo[12]);
-                Checking checkingAccount = new Checking(checkingAccNum, checkingStartBalance);
-                Savings savingsAccount = new Savings(savingAccNum, savingStartBalance);
-                Credit creditAccount = new Credit(creditAccNum, creditStartBalance, creditMax);
-                customers.put(idNum + firstName + lastName, new Customer(idNum, firstName, lastName, dob, address, phoneNum, checkingAccount, savingsAccount, creditAccount));
-                checkingAccounts.put(checkingAccNum, checkingAccount);
-                savingAccounts.put(savingAccNum, savingsAccount);
-                creditAccounts.put(creditAccNum, creditAccount);
-            }
+            HEADERS = scan.nextLine().split(",");
         } catch (Exception e) {
             System.out.println("Error loading from file: " + e.getMessage());
         }
+        Reader in = new FileReader(filename);
+        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+            CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
+                    .setHeader(HEADERS)
+                    .setSkipHeaderRecord(true)
+                    .build();
+
+            Iterable<CSVRecord> records = csvFormat.parse(in);
+            {
+                for (CSVRecord record : records) {
+                    int idNum = Integer.parseInt(record.get(HEADERS[0]));
+                    String firstName = record.get(HEADERS[1]).toLowerCase();
+                    String lastName = record.get(HEADERS[2]).toLowerCase();
+                    String dob = record.get(HEADERS[3]);
+                    String address = record.get(HEADERS[4]).replace("\"", "");
+                    String phoneNum = record.get(HEADERS[5]).replaceAll("[()\\s-]", "");
+                    int checkingAccNum = Integer.parseInt(record.get(HEADERS[6]));
+                    double checkingStartBalance = Double.parseDouble(record.get(HEADERS[7]));
+                    int savingAccNum = Integer.parseInt(record.get(HEADERS[8]));
+                    double savingStartBalance = Double.parseDouble(record.get(HEADERS[9]));
+                    int creditAccNum = Integer.parseInt(record.get(HEADERS[10]));
+                    int creditMax = Integer.parseInt(record.get(HEADERS[11]));
+                    double creditStartBalance = Double.parseDouble(record.get(HEADERS[12]));
+                    Checking checkingAccount = new Checking(checkingAccNum, checkingStartBalance);
+                    Savings savingsAccount = new Savings(savingAccNum, savingStartBalance);
+                    Credit creditAccount = new Credit(creditAccNum, creditStartBalance, creditMax);
+                    customers.put(idNum + firstName + lastName, new Customer(idNum, firstName, lastName, dob, address, phoneNum, checkingAccount, savingsAccount, creditAccount));
+                    checkingAccounts.put(checkingAccNum, checkingAccount);
+                    savingAccounts.put(savingAccNum, savingsAccount);
+                    creditAccounts.put(creditAccNum, creditAccount);
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    /**
+
+        /**
      * Update csv.
      *
      * @param filename the filename.
      */
     public static void updateCSV(String filename){
-        // loop through every customer upon exit, update row with (id, name, date of birth, phone number, Checking Account Number, Checking Starting Balance, Savings Account Number, Savings Starting Balance, Credit Account Number, Credit Max, Credit Starting Balance)
+        // Loop through every customer upon exit, update row with (id, name, date of birth, phone number, Checking Account Number, Checking Starting Balance, Savings Account Number, Savings Starting Balance, Credit Account Number, Credit Max, Credit Starting Balance)
     }
 
     /**
@@ -65,7 +80,14 @@ public class RunBank {
      * @param filename the filename.
      */
     public static void appendLog(String filename, String msg){
-        // add msg to a log
+        try {
+            FileWriter myWriter = new FileWriter(filename+".txt");
+            myWriter.write(msg);
+            myWriter.close();
+            System.out.println("Successfully loaded all customers to " + filename + ".txt");
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+        }
     }
 
     /**
@@ -292,9 +314,9 @@ public class RunBank {
                         System.out.println("Invalid input. Please enter a valid amount.");
                         break;
                     }
+                    account.deposit(depositAmount, false);
                     printHeader(true);
                     account.printAccount(true);
-                    account.deposit(depositAmount, false);
                     return;
                 case "c":
                     System.out.print("Enter withdrawal amount: ");
@@ -305,9 +327,9 @@ public class RunBank {
                         System.out.println("Invalid input. Please enter a valid amount.");
                         break;
                     }
+                    account.withdraw(withdrawAmount, false);
                     printHeader(true);
                     account.printAccount(true);
-                    account.withdraw(withdrawAmount, false);
                     return;
                 case "d":
                     TwoAccountTransaction(scan, customer, account);
@@ -431,7 +453,7 @@ public class RunBank {
      *
      * @param args the input arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
         loadFromCSV("bankUsers.csv");
         Scanner scan = new Scanner(System.in);
         String message = "El Paso Miner's Bank";

@@ -51,7 +51,7 @@ abstract class Account {
      **/
     public void deposit(double amount, boolean suppressSuccess){
         this.balance += amount;
-        if (!suppressSuccess) System.out.println("*  *  *  *  *  *  *  Deposit Successful   *  *  *  *  *  *  *\n");
+        if (!suppressSuccess) System.out.println("\n*  *  *  *  *  *  *  Deposit Successful   *  *  *  *  *  *  *");
     }
 
     /**
@@ -62,10 +62,10 @@ abstract class Account {
     public boolean withdraw(double amount, boolean suppressSuccess){
         if (amount <= this.balance && amount > 0){
             this.balance -= amount;
-            if (!suppressSuccess) System.out.println("*  *  *  *  *  *  *  Withdraw Successful  *  *  *  *  *  *  *\n");
+            if (!suppressSuccess) System.out.println("\n*  *  *  *  *  *  *  Withdraw Successful  *  *  *  *  *  *  *");
             return true;
         }
-        System.out.println("*  *  *  *  *  *  *  Insufficient Funds   *  *  *  *  *  *  *\n");
+        System.out.println("\n*  *  *  *  *  *  *  Insufficient Funds   *  *  *  *  *  *  *");
         return false;
     }
 
