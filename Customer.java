@@ -3,7 +3,7 @@ import java.util.ArrayList;
 /**
  * Represents a customer with their accounts, dob, address, phone number, and unique id number
  */
-class Customer extends Person{
+public class Customer extends Person{
     ArrayList<Account> accounts = new ArrayList<Account>();
     String dob;
     String address;
@@ -19,20 +19,61 @@ class Customer extends Person{
      * @param dob           The customer's date of birth.
      * @param address       The customer's address of residence.
      * @param phoneNum      The customer's phone number.
-     * @param checkingAcc   The customer's checking account.
-     * @param savingsAcc    The customer's savings account.
-     * @param creditAcc     The customer's credit account.
      */
-    Customer(int idNum, String firstName, String lastName, String dob, String address, String phoneNum, Account checkingAcc, Account savingsAcc, Credit creditAcc){
+    Customer(int idNum, String firstName, String lastName, String dob, String address, String phoneNum){
         super(firstName, lastName);
         this.idNum = idNum;
         this.dob = dob;
         this.address = address;
         this.phoneNum = phoneNum;
-        accounts.add(checkingAcc);
-        accounts.add(savingsAcc);
-        accounts.add(creditAcc);
     }
+
+    public void addAccount(Account account){
+        this.accounts.add(account);
+    }
+
+    public int getIdNum(){
+        return this.idNum;
+    }
+
+    public String getFirstName(){
+        return this.firstName;
+    }
+
+    public String getLastName(){
+        return this.lastName;
+    }
+
+    public String getDob(){
+        return this.dob;
+    }
+
+    public String getAddress(){
+        return this.address;
+    }
+
+    public String getPhoneNum(){
+        return this.phoneNum;
+    }
+
+
+    public ArrayList<Account> getAccounts(){
+        return this.accounts;
+    }
+
+    /**
+     * Prints an account's information if it exists.
+     *
+     * @param showBalance   Print the balance if true, don't if false.
+     * @return              True or false, if account exists with customer.
+     */
+    public void viewAccounts(boolean showBalance) {
+        System.out.println("Accounts:");
+        this.accounts.getFirst().printHeader(showBalance);
+        this.accounts.forEach(account -> account.printAccount(showBalance));
+    }
+
+
 
     /**
      * Transfers money from one customer's account to another account under the same customer.

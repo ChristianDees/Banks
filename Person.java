@@ -2,7 +2,7 @@
  * Represents a person with their first and last name
  */
 
-abstract class Person {
+public abstract class Person {
     String firstName;
     String lastName;
 

@@ -4,7 +4,7 @@ import java.text.NumberFormat;
  * Represents an Account with its unique account number and current balance
  */
 
-abstract class Account {
+public abstract class Account {
     int accNum;
     double balance;
 
@@ -86,6 +86,25 @@ abstract class Account {
             System.out.printf("| %-15s | %-20s |\n",
                     this.getType(),
                     this.getAccountNumber());
+            System.out.println("+-----------------+----------------------+");
+        }
+    }
+
+    /**
+     * Print header for an account.
+     *
+     * @param showBalance Print balance in header.
+     */
+    public void printHeader(boolean showBalance){
+        if (showBalance) {
+            // full header
+            System.out.println("+-----------------+----------------------+------------------+");
+            System.out.printf("| %-15s | %-20s | %-16s |\n", "Type", "Account Number", "Balance");
+            System.out.println("+-----------------+----------------------+------------------+");
+        } else {
+            // partial header
+            System.out.println("+-----------------+----------------------+");
+            System.out.printf("| %-15s | %-20s |\n", "Type", "Account Number");
             System.out.println("+-----------------+----------------------+");
         }
     }
