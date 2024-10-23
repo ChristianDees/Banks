@@ -9,10 +9,10 @@ public class RunBank {
      */
     public static void main(String[] args) {
         FileHandler fh = new FileHandler();
-        fh.loadFromCSV("bankUsers.csv");
+        if (!fh.loadFromCSV("BankUsers")) return;
         InputHandler ui = new InputHandler();
         ui.displayWelcomeMessage();
         ui.handleInput();
-        fh.exportToCSV("bankUsers-new.csv");
+        fh.exportToCSV("EPMB_Report");
     }
 }

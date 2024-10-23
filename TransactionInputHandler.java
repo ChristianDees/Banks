@@ -1,57 +1,38 @@
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 public class TransactionInputHandler extends UserInterface {
 
-    /**
-     * Query the user for their type of transaction and perform it.
-     *
-     * @param scan        The scanner object to continue taking input.
-     * @param account     The account provided to perform an action on.
-     * @param customer    The customer provided to perform an action.
-     */
-    public void performTransaction(Scanner scan, Account account, Customer customer) {
+    private void depositAmount(Scanner scan, Account account) {
         for (int attempts = 0; attempts < 3; attempts++) {
-            System.out.println("Choose an action:\nA. Inquire Account Details\nB. Deposit\nC. Withdraw\nD. Transfer");
-            String input = scan.nextLine().trim().toLowerCase();
-            if (checkExit(input)) return;
-            switch (input) {
-                case "a":
-                    account.printHeader(true);
-                    account.printAccount(true);
-                    return;
-                case "b":
-                    System.out.print("Enter deposit amount: \n$");
-                    double depositAmount;
-                    try {
-                        depositAmount = Double.parseDouble(scan.nextLine().trim().replace(",",""));
-                    } catch (NumberFormatException e) {
-                        System.out.println("Invalid input. Please enter a valid amount.");
-                        break;
-                    }
-                    account.deposit(depositAmount, false);
-                    account.printHeader(true);
-                    account.printAccount(true);
-                    return;
-                case "c":
-                    System.out.print("Enter withdrawal amount: \n$");
-                    double withdrawAmount;
-                    try {
-                        withdrawAmount = Double.parseDouble(scan.nextLine().trim().replace(",",""));
-                    } catch (NumberFormatException e) {
-                        System.out.print("Invalid input. Please enter a valid amount.");
-                        break;
-                    }
-                    account.withdraw(withdrawAmount, false);
-                    account.printHeader(true);
-                    account.printAccount(true);
-                    return;
-                case "d":
-                    TwoAccountTransaction(scan, customer, account);
-                    return;
-                default:
-                    System.out.println("Invalid choice.");
+            System.out.print("Enter deposit amount: \n$");
+            String depositAmountStr = scan.nextLine();
+            double depositAmount = this.validateMoney(depositAmountStr);
+            if (depositAmount >= 0) {
+                account.deposit(depositAmount, false);
+                account.printAccount(true, true);
+                return;
+            } else {
+                System.out.println("Invalid amount. Please try again.");
             }
         }
+        System.out.println("Maximum attempts reached. Returning to main menu.");
+    }
+
+    private void withdrawAmount(Scanner scan, Account account) {
+        for (int attempts = 0; attempts < 3; attempts++) {
+            System.out.print("Enter withdrawal amount: \n$");
+            String withdrawAmountStr = scan.nextLine();
+            double withdrawAmount = this.validateMoney(withdrawAmountStr);
+            if (withdrawAmount >= 0) {
+                account.withdraw(withdrawAmount, false);
+                account.printAccount(true, true);
+                return;
+            } else {
+                System.out.println("Invalid amount. Please try again.");
+            }
+        }
+        System.out.println("Maximum attempts reached. Returning to main menu.");
     }
 
     /**
@@ -59,14 +40,32 @@ public class TransactionInputHandler extends UserInterface {
      *
      * @param scan         The scanner object to continue taking input.
      */
-    public void oneAccountTransaction(Scanner scan) {
+    public void oneAccountTransaction(Scanner scan, Customer customer) {
         InputHandler ih = new InputHandler();
-        String name = ih.getUserName(scan, false);
-        if (name == null) return;
-        Customer customer = customers.get(name);
+        customer.viewAccounts(false);
         Account account = ih.getAccountForTransaction(scan, customer);
         if (account == null) return;
-        this.performTransaction(scan, account, customer);
+        for (int attempts = 0; attempts < 3; attempts++) {
+            System.out.print("Choose an action:\nA. Inquire Account Details\nB. Deposit\nC. Withdraw\nD. Transfer\n> ");
+            String input = scan.nextLine().trim().toLowerCase();
+            if (checkExit(input)) return;
+            switch (input) {
+                case "a":
+                    account.printAccount(true, true);
+                    return;
+                case "b":
+                    depositAmount(scan, account);
+                    return;
+                case "c":
+                    withdrawAmount(scan, account);
+                    return;
+                case "d":
+                    TwoAccountTransaction(scan, customer, account, true);
+                    return;
+                default:
+                    System.out.println("Invalid choice.");
+            }
+        }
     }
 
     /**
@@ -76,60 +75,61 @@ public class TransactionInputHandler extends UserInterface {
      * @param customerOne   The first customer involved in the transaction.
      * @param accountOne    The first account associated in the transaction.
      */
-    public void TwoAccountTransaction(Scanner scan, Customer customerOne, Account accountOne) {
+    public void TwoAccountTransaction(Scanner scan, Customer customerOne, Account accountOne, boolean transfer) {
+        boolean send = !transfer;
         InputHandler ih = new InputHandler();
-        if (customerOne == null) {
-            String customerNameOne = ih.getUserName(scan, false);
-            if (customerNameOne == null) return;
-            customerOne = customers.get(customerNameOne);
+        if (send) customerOne.viewAccounts(false);
+        if (accountOne == null) {
             accountOne = ih.getAccountForTransaction(scan, customerOne);
-            if (accountOne == null) return;  // Early exit if no account
-        } else {
-            System.out.println("Enter the account you would like to transfer funds into.");
+            if (accountOne == null) return;
         }
-
-        String customerNameTwo = ih.getUserName(scan, false);
-        if (customerNameTwo == null) return;
-
-        Customer customerTwo = customers.get(customerNameTwo);
-        Account accountTwo = ih.getAccountForTransaction(scan, customerTwo);
-        if (accountTwo == null || customerTwo == null) return;
-
-        double amount = getTransferAmount(scan);
-        if (amount <= 0) return;
-
-        executeTransaction(customerOne, accountOne, customerTwo, accountTwo, amount);
+        Account accountTwo;
+        Customer customerTwo;
+        if (send) {
+            System.out.println("Please enter the following for the receiving account:\n" + "-".repeat(51));
+            customerTwo = ih.getUserName(scan, true, false);
+            if (customerTwo == null) return;
+            accountTwo = ih.getAccountForTransaction(scan, customerTwo);
+        } else {
+            accountTwo = ih.getAccountForTransaction(scan, customerOne);
+        }
+        if (accountTwo == null) return;
+        boolean rc = transfer ? this.transferAmount(scan, customerOne, accountOne, accountTwo) : this.sendAmount(scan, customerOne, accountOne, accountTwo);
+        FileHandler fw = new FileHandler();
+        if (rc) {
+            String transactionType = transfer ? "transfer" : "send";
+            fw.appendLog("transactions", transactionType + " successful");
+        }
     }
 
-    private double getTransferAmount(Scanner scan) {
-        double amount;
-        System.out.print("Enter transfer amount: \n$");
+    private boolean transferAmount(Scanner scan, Customer customer, Account accountOne, Account accountTwo) {
         for (int attempts = 0; attempts < 3; attempts++) {
-            try {
-                amount = Double.parseDouble(scan.nextLine().trim());
-                if (amount > 0) return amount; // Valid amount
-                System.out.println("Amount must be greater than zero.");
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a valid number.");
+            System.out.print("Enter transfer amount: \n$");
+            String transferAmountStr = scan.nextLine();
+            double transferAmount = this.validateMoney(transferAmountStr);
+            if (transferAmount >= 0) {
+                return customer.transfer(accountOne, accountTwo, transferAmount);
+            } else {
+                System.out.println("Invalid format or amount. Please try again.");
             }
         }
-        return -1;
+        System.out.println("Maximum attempts reached. Returning to main menu.");
+        return false;
     }
 
-    private void executeTransaction(Customer customerOne, Account accountOne, Customer customerTwo, Account accountTwo, double amount) {
-        boolean isTransfer = customerOne.equals(customerTwo);
-        accountOne.printHeader(true);
-        boolean rc;
-        FileHandler fw = new FileHandler();
-        if (isTransfer) {
-            rc = customerOne.transfer(accountOne, accountTwo, amount);
-            // Update log here if rc is true
-        } else {
-            rc = customerOne.send(accountOne, accountTwo, amount);
-            // Update log here if rc is true
+    private boolean sendAmount(Scanner scan, Customer customerOne, Account accountOne, Account accountTwo) {
+        for (int attempts = 0; attempts < 3; attempts++) {
+            System.out.print("Enter transfer amount: \n$");
+            String sendAmountStr = scan.nextLine();
+            double sendAmount = this.validateMoney(sendAmountStr);
+            if (sendAmount >= 0) {
+                return customerOne.send(accountOne, accountTwo, sendAmount);
+            } else {
+                System.out.println("Invalid amount. Please try again.");
+            }
         }
-        if (rc) fw.appendLog("transactions", "enter message here");
-        else fw.appendLog("errorLog", "enter message here");
+        System.out.println("Maximum attempts reached. Returning to main menu.");
+        return false;
     }
 
     /**
@@ -143,5 +143,12 @@ public class TransactionInputHandler extends UserInterface {
         return "checking".equalsIgnoreCase(accType) ? checkingAccounts.get(accNum) :
                 "savings".equalsIgnoreCase(accType) ? savingAccounts.get(accNum) :
                         "credit".equalsIgnoreCase(accType) ? creditAccounts.get(accNum) : null;
+    }
+
+    private double validateMoney(String input) {
+        boolean correctFormat = Pattern.matches("^(\\d{1,3}(,\\d{3})*(\\.\\d{1,2})?|\\d+(\\.\\d{1,2})?)$", input);
+        if (correctFormat)
+            return Double.parseDouble(input.replace(",", ""));
+        return -1;
     }
 }

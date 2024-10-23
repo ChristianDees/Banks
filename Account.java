@@ -74,7 +74,8 @@ public abstract class Account {
      *
      * @param showBalance  Print the balance along with other attributes.
      **/
-    public void printAccount(boolean showBalance) {
+    public void printAccount(boolean showBalance, boolean printHeader) {
+        if (printHeader) this.printHeader(showBalance);
         NumberFormat formatter = NumberFormat.getCurrencyInstance();
         if (showBalance) {
             System.out.printf("| %-15s | %-20s | %-16s |\n",

@@ -32,7 +32,7 @@ public class Customer extends Person{
         this.accounts.add(account);
     }
 
-    public int getIdNum(){
+    public int getId(){
         return this.idNum;
     }
 
@@ -56,7 +56,6 @@ public class Customer extends Person{
         return this.phoneNum;
     }
 
-
     public ArrayList<Account> getAccounts(){
         return this.accounts;
     }
@@ -65,15 +64,13 @@ public class Customer extends Person{
      * Prints an account's information if it exists.
      *
      * @param showBalance   Print the balance if true, don't if false.
-     * @return              True or false, if account exists with customer.
      */
     public void viewAccounts(boolean showBalance) {
-        System.out.println("Accounts:");
-        this.accounts.getFirst().printHeader(showBalance);
-        this.accounts.forEach(account -> account.printAccount(showBalance));
+        for (int i = 0; i < this.accounts.size(); i++) {
+            boolean isFirstAccount = (i == 0);
+            this.accounts.get(i).printAccount(showBalance, isFirstAccount);
+        }
     }
-
-
 
     /**
      * Transfers money from one customer's account to another account under the same customer.
@@ -85,18 +82,18 @@ public class Customer extends Person{
      * @return          The successfulness of money being transferred.
      * **/
     public boolean transfer(Account src, Account dst, double amount){
+        boolean rc = false;
         if (this.accounts.contains(src) && this.accounts.contains(dst)){
-            boolean rc = src.withdraw(amount, true);
+            rc = src.withdraw(amount, true);
             if (rc){
                 dst.deposit(amount, true);
-                src.printAccount(true);
-                dst.printAccount(true);
-                System.out.println("*  *  *  *  *  *  *  Transfer Successful  *  *  *  *  *  *  *\n");
-                return true;
+                System.out.println("\n*  *  *  *  *  *  *  Transfer Successful  *  *  *  *  *  *  *");
             }
         }
-        System.out.println("*  *  *  *  *  *  *    Transfer Failed    *  *  *  *  *  *  *\n");
-        return false;
+        if (!rc) System.out.println("*  *  *  *  *  *  *    Transfer Failed    *  *  *  *  *  *  *");
+        src.printAccount(true, true);
+        dst.printAccount(true, false);
+        return rc;
     }
 
     /**
@@ -109,13 +106,14 @@ public class Customer extends Person{
      * @return          The successfulness of money being sent.
      * **/
     public boolean send(Account src, Account dst, double amount) {
-        if (src.withdraw(amount, true)) {
+        boolean rc = src.withdraw(amount, true);
+        if (rc) {
             dst.deposit(amount, true);
-            src.printAccount(true);
-            System.out.println("*  *  *  *  *  *  *    Send Successful    *  *  *  *  *  *  *\n");
-            return true;
+            System.out.println("\n*  *  *  *  *  *  *    Send Successful    *  *  *  *  *  *  *");
+        } else {
+            System.out.println("*  *  *  *  *  *  *      Send Failed      *  *  *  *  *  *  *");
         }
-        System.out.println("*  *  *  *  *  *  *      Send Failed      *  *  *  *  *  *  *\n");
-        return false;
+        src.printAccount(true, true);
+        return rc;
     }
 }
