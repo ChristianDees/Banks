@@ -63,12 +63,12 @@ public class Customer extends Person{
     /**
      * Prints an account's information if it exists.
      *
-     * @param showBalance   Print the balance if true, don't if false.
+     * @param viewBalance   Print the balance if true, don't if false.
      */
-    public void viewAccounts(boolean showBalance) {
+    public void viewAccounts(boolean viewBalance) {
         for (int i = 0; i < this.accounts.size(); i++) {
             boolean isFirstAccount = (i == 0);
-            this.accounts.get(i).printAccount(showBalance, isFirstAccount);
+            this.accounts.get(i).printAccount(viewBalance, isFirstAccount);
         }
     }
 

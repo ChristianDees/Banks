@@ -3,9 +3,6 @@ import org.apache.commons.csv.CSVRecord;
 import java.io.FileReader;
 import java.io.*;
 import java.util.*;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 
 public class FileHandler extends UserInterface{
 
@@ -72,9 +69,7 @@ public class FileHandler extends UserInterface{
      */
     public void exportToCSV(String filename) {
         // setup filename
-        String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyMMdd"));
-        String time = LocalTime.now().format(DateTimeFormatter.ofPattern("HHmm"));
-        filename = String.format("%s_%s_%s.csv", filename, date, time);
+        filename += ".csv";
         HashMap<String, String[]> existingData = new HashMap<>();
         // get current data
         try (Scanner scan = new Scanner(new FileReader(filename))) {
@@ -93,7 +88,6 @@ public class FileHandler extends UserInterface{
                 System.out.println("Error: ID column does not exist within the file.");
                 return;
             }
-
             // get current data
             while (scan.hasNextLine()) {
                 String line = scan.nextLine();
@@ -107,7 +101,6 @@ public class FileHandler extends UserInterface{
         } catch (IOException e) {
             System.out.println("Error reading the existing CSV file: " + e.getMessage());
         }
-
         // start writing
         try (FileWriter writer = new FileWriter(filename, false)) { // Overwrite file
             String[] headers = {
@@ -162,7 +155,6 @@ public class FileHandler extends UserInterface{
                         }
                     }
                 }
-
                 // get new information
                 currentValues[6] = checkingAccountNumber;
                 currentValues[7] = checkingBalance;
@@ -171,7 +163,6 @@ public class FileHandler extends UserInterface{
                 currentValues[10] = creditAccountNumber;
                 currentValues[11] = creditMax;
                 currentValues[12] = creditBalance;
-
                 // get current vals
                 String[] existingValues = existingData.get(currentValues[0]);
                 if (existingValues != null) {
@@ -188,13 +179,11 @@ public class FileHandler extends UserInterface{
                     existingData.put(currentValues[0], currentValues);
                 }
             }
-
             // write all updated or new entries back to the file
             for (String[] values : existingData.values()) {
                 writer.write(String.join(",", values));
                 writer.write(System.lineSeparator());
             }
-
             System.out.println("\n* * * Successfully exported data to " + filename + " * * *");
         } catch (IOException e) {
             System.out.println("An error occurred while writing to the log file: " + e.getMessage());
@@ -209,7 +198,6 @@ public class FileHandler extends UserInterface{
     public void appendLog(String filename, String msg) {
         try (FileWriter myWriter = new FileWriter(filename + ".txt", true)) {
             myWriter.write(msg + System.lineSeparator());
-            System.out.println("Successfully appended to " + filename + ".txt");
         } catch (IOException e) {
             System.out.println("An error occurred while writing to the log file: " + e.getMessage());
         }
