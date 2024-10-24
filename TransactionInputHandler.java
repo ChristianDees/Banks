@@ -1,8 +1,19 @@
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
+/**
+ * The type Transaction input handler.
+ */
 public class TransactionInputHandler extends UserInterface {
 
+    /**
+     * Ask user for how much money to deposit.
+     *
+     * @param scan      scanner object for input
+     * @param customer  customer in charge of account to deposit in
+     * @param account   account to deposit money into
+     * @param fh        file handler to handle logging
+     */
     private void depositAmount(Scanner scan, Customer customer, Account account, FileHandler fh) {
         for (int attempts = 0; attempts < 3; attempts++) {
             System.out.print("Enter deposit amount: \n$");
@@ -22,7 +33,14 @@ public class TransactionInputHandler extends UserInterface {
         System.out.println("Maximum attempts reached. Returning to main menu.");
     }
 
-
+    /**
+     * Ask user for how much money to withdraw.
+     *
+     * @param scan      scanner object for input
+     * @param customer  customer in charge of account to withdraw in
+     * @param account   account to withdraw money into
+     * @param fh        file handler to handle logging
+     */
     private void withdrawAmount(Scanner scan, Customer customer, Account account, FileHandler fh) {
         for (int attempts = 0; attempts < 3; attempts++) {
             System.out.print("Enter withdrawal amount: \n$");
@@ -53,7 +71,9 @@ public class TransactionInputHandler extends UserInterface {
     /**
      * Handle a transaction with one account.
      *
-     * @param scan         The scanner object to continue taking input.
+     * @param scan     The scanner object to continue taking input.
+     * @param customer the customer
+     * @param fh       the fh
      */
     public void oneAccountTransaction(Scanner scan, Customer customer, FileHandler fh) {
         InputHandler ih = new InputHandler();
@@ -89,9 +109,11 @@ public class TransactionInputHandler extends UserInterface {
     /**
      * Handle a transaction between two accounts.
      *
-     * @param scan          The scanner object to continue taking input.
-     * @param customerOne   The first customer involved in the transaction.
-     * @param accountOne    The first account associated in the transaction.
+     * @param scan        The scanner object to continue taking input.
+     * @param customerOne The first customer involved in the transaction.
+     * @param accountOne  The first account associated in the transaction.
+     * @param transfer    the transfer
+     * @param fh          the fh
      */
     public void TwoAccountTransaction(Scanner scan, Customer customerOne, Account accountOne, boolean transfer, FileHandler fh) {
         boolean send = !transfer;
@@ -175,9 +197,9 @@ public class TransactionInputHandler extends UserInterface {
     /**
      * Return account from the respective array lists.
      *
-     * @param accType     The account type the user provided.
-     * @param accNum      The account number the user provided.
-     * @return            The account if it exists.
+     * @param accType The account type the user provided.
+     * @param accNum  The account number the user provided.
+     * @return The account if it exists.
      */
     public Account getAccount(String accType, int accNum) {
         return "checking".equalsIgnoreCase(accType) ? checkingAccounts.get(accNum) :

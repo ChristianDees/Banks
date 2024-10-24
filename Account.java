@@ -3,7 +3,6 @@ import java.text.NumberFormat;
 /**
  * Represents an Account with its unique account number and current balance
  */
-
 public abstract class Account {
     int accNum;
     double balance;
@@ -77,6 +76,7 @@ public abstract class Account {
     public void printAccount(boolean showBalance, boolean printHeader) {
         if (printHeader) this.printHeader(showBalance);
         NumberFormat formatter = NumberFormat.getCurrencyInstance();
+        // print the balance
         if (showBalance) {
             System.out.printf("| %-15s | %-20s | %-16s |\n",
                     this.getType(),

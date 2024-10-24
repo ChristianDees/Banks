@@ -28,34 +28,65 @@ public class Customer extends Person{
         this.phoneNum = phoneNum;
     }
 
-    public void addAccount(Account account){
-        this.accounts.add(account);
-    }
-
+    /**
+     * Get id int.
+     *
+     * @return the int
+     */
     public int getId(){
         return this.idNum;
     }
 
+    /**
+     * Get first name string.
+     *
+     * @return the string
+     */
     public String getFirstName(){
         return this.firstName;
     }
 
+    /**
+     * Get last name string.
+     *
+     * @return the string
+     */
     public String getLastName(){
         return this.lastName;
     }
 
+    /**
+     * Get dob string.
+     *
+     * @return the string
+     */
     public String getDob(){
         return this.dob;
     }
 
+    /**
+     * Get address string.
+     *
+     * @return the string
+     */
     public String getAddress(){
         return this.address;
     }
 
+    /**
+     * Get phone num string.
+     *
+     * @return the string
+     */
     public String getPhoneNum(){
         return this.phoneNum;
     }
 
+    /**
+     * Get accounts array list.
+     *
+     * @return the array list
+     */
     public ArrayList<Account> getAccounts(){
         return this.accounts;
     }
@@ -70,6 +101,15 @@ public class Customer extends Person{
             boolean isFirstAccount = (i == 0);
             this.accounts.get(i).printAccount(viewBalance, isFirstAccount);
         }
+    }
+
+    /**
+     * Add account.
+     *
+     * @param account the account
+     */
+    public void addAccount(Account account){
+        this.accounts.add(account);
     }
 
     /**

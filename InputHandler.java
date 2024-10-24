@@ -1,8 +1,14 @@
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+/**
+ * Represents an object to handle input for the bank
+ */
 public class InputHandler extends UserInterface{
+
+    /**
+     * Displays a welcome message to the user
+     */
     public void displayWelcomeMessage(){
         String message = "El Paso Miner's Bank";
         int length = message.length();
@@ -11,22 +17,25 @@ public class InputHandler extends UserInterface{
         System.out.println("+" + "-".repeat(length + 2) + "+");
         System.out.println("Type 'exit' to quit.\n");
     }
+
     /**
      * Query user for the type of account to handle with.
      *
      * @param scan          The scanner object to continue taking input.
      * @return              The account type if it exists.
      */
-
     private String getAccountType(Scanner scan, FileHandler fh) {
+        // 3 attempts
         for (int attempts = 0; attempts < 3; attempts++) {
             System.out.print("What is the account type? (checking/savings/credit):\n> ");
             String accType = scan.nextLine().trim();
             if (checkExit(accType)) return null;
+            // get type of account the user entered
             if ("checking".equalsIgnoreCase(accType) || "savings".equalsIgnoreCase(accType) || "credit".equalsIgnoreCase(accType)){
                 fh.appendLog("EPMB_Transactions", "Manager accessed a " + accType + " account.");
                 return accType;
             }
+            // error logging
             System.out.println("Invalid account type. Please enter 'checking', 'savings', or 'credit'.");
             fh.appendLog("EPMB_Error_Log", "Manager attempted to enter account type. Reason for failure: Attempt to access an invalid account type.");
         }
@@ -40,11 +49,13 @@ public class InputHandler extends UserInterface{
      * @return              The account that has the provided account type and account number.
      */
     private static Account getAccountInfo(Scanner scan, String accType, FileHandler fh) {
+        // for three times
         for (int attempts = 0; attempts < 3; attempts++) {
             System.out.print("What is the account number?\n> ");
             String input = scan.nextLine().trim();
             if (checkExit(input)) return null;
             try {
+                // access account based on type and number
                 int accNum = Integer.parseInt(input);
                 TransactionInputHandler th = new TransactionInputHandler();
                 Account account = th.getAccount(accType, accNum);
@@ -52,10 +63,12 @@ public class InputHandler extends UserInterface{
                     fh.appendLog("EPMB_Transactions", "Manager accessed account " + account.getType() + " " + "[Account Number:" + account.getAccountNumber() + "]");
                     return account;
                 } else {
+                    // error logging
                     fh.appendLog("EPMB_Error_Log", "Manager attempted to access an account. Reason for failure: Attempt to access a nonexistent account.");
                     System.out.println("That account does not exist.");
                 }
             } catch (NumberFormatException e) {
+                // error logging
                 fh.appendLog("EPMB_Error_Log", "Manager attempted to access an account. Reason for failure: Invalid format of account number.");
                 System.out.println("Invalid input. Please enter a valid account number.");
             }
@@ -85,6 +98,7 @@ public class InputHandler extends UserInterface{
      * @param viewBalance   Flag to show balance.
      */
     public Customer getUserName(Scanner scan, boolean viewAccounts, boolean viewBalance, FileHandler fh) {
+        // three attempts
         for (int attempts = 0; attempts < 3; attempts++) {
             if(this.leave())return null;
             System.out.print("Enter customer id and name (id, name):\n> ");
@@ -92,6 +106,7 @@ public class InputHandler extends UserInterface{
             if (checkExit(input)) return null;
             String[] parts = input.split(",");
             if (parts.length != 2) {
+                // error logging
                 fh.appendLog("EPMB_Error_Log", "Attempted to ask for user's name. Reason for failure: Invalid format of id, name.");
                 if (attempts < 2)
                     System.out.println("Invalid format. Use 'id, name'.");
@@ -102,9 +117,11 @@ public class InputHandler extends UserInterface{
                 Customer customer = customers.get(formattedName);
                 if (customer != null){
                     if (viewAccounts)
+                        // print accounts if given
                         customer.viewAccounts(viewBalance);
                     return customer;
                 }
+                // error logging
                 fh.appendLog("EPMB_Error_Log", "Attempted to ask for user's name. Reason for failure: Attempted to get nonexistent customer.");
                 System.out.println("There is no account under that name associated with this bank.");
             }
@@ -112,8 +129,14 @@ public class InputHandler extends UserInterface{
         return null;
     }
 
+    /**
+     * Query for user's role to log in
+     *
+     * @param scan required for input
+     */
     private void getUserRole(Scanner scan){
         FileHandler fh = new FileHandler();
+        // check if user logged out
         if (logout){
             fh.appendLog("EPMB_Transactions", "User logged out.");
             logout = false;
@@ -131,6 +154,7 @@ public class InputHandler extends UserInterface{
                 exit = true;
                 break;
             default:
+                // error logging
                 fh.appendLog("EPMB_Error_Log", "User attempted to log in. Reason for failure: Invalid option of login.");
                 System.out.println("Invalid option. Please choose 'customer' or 'manager'.");
         }
@@ -143,8 +167,10 @@ public class InputHandler extends UserInterface{
      */
     private void handleCustomer(Scanner scan, FileHandler fh) {
         int attempts = 0;
+        // get their username
         Customer customer = this.getUserName(scan, false, false, fh);
         if (customer != null){
+            // three attempts or they log out
             while(attempts < 3 || logout){
                 if (this.leave()) return;
                 System.out.print("Choose a transaction:\nA. Transaction between single person.\nB. Transaction between two people.\n> ");
@@ -159,6 +185,7 @@ public class InputHandler extends UserInterface{
                         transaction.TwoAccountTransaction(scan, customer, null, false, fh);
                         break;
                     default:
+                        // error logging
                         fh.appendLog("EPMB_Error_Log", customer.getFullName() + " [ID:" + customer.getId() + "] attempted to specify transaction parties. Reason for failure: Invalid option when specifying transaction party.");
                         System.out.println("Invalid option. Please choose 'A' or 'B'.");
                         attempts++;
@@ -175,8 +202,10 @@ public class InputHandler extends UserInterface{
      */
     private void handleManager(Scanner scan, FileHandler fh) {
         int attempts = 0;
+        // three attempts
         while(attempts < 3){
             if (this.leave()) return;
+            // provide options
             System.out.print("A. Inquire accounts by customer name and id.\nB. Inquire account by type/number.\n> ");
             String input = scan.nextLine().trim().toLowerCase();
             if (checkExit(input)) return;
@@ -188,6 +217,7 @@ public class InputHandler extends UserInterface{
                     inquireByAccount(scan, fh);
                     break;
                 default:
+                    // error logging
                     fh.appendLog("EPMB_Error_Log", "Manager attempted to inquire about an account. Reason for failure: Invalid option for how to inquire for account.");
                     System.out.println("Invalid option. Please choose 'A' or 'B'.");
                     attempts++;
@@ -196,7 +226,6 @@ public class InputHandler extends UserInterface{
         System.out.println("Too many attempts. Please log in again.\n");
     }
 
-
     /**
      * Ask user for an account and return it.
      *
@@ -204,12 +233,14 @@ public class InputHandler extends UserInterface{
      * @param customer      The customer who is answering the question.
      */
     public Account getAccountForTransaction(Scanner scan, Customer customer, FileHandler fh) {
+        // three attempts
         for (int attempts = 0; attempts < 3; attempts++) {
             System.out.print("Specify the account (type, number):\n> ");
             String input = scan.nextLine().trim().toLowerCase();
             String[] parts = input.split(",");
             if (checkExit(input)) return null;
             if (parts.length != 2) {
+                // error logging
                 fh.appendLog("EPMB_Error_Log", customer.getFullName() + " [ID:" + customer.getId() + "] Reason for failure: Invalid format when specifying account.");
                 System.out.println("Invalid format.");
                 continue;
@@ -222,17 +253,21 @@ public class InputHandler extends UserInterface{
                 if (account != null) {
                     ArrayList<Account> accounts = customer.accounts;
                     if (accounts.contains(account)) {
+                        // access account
                         fh.appendLog("EPMB_Transactions", customer.getFullName() + " [ID:" + customer.getId() + "] accessed account " + account.getType() + " " + "[Account Number:" + account.getAccountNumber() + "]");
                         return account;
                     }else {
+                        // error logging
                         fh.appendLog("EPMB_Error_Log", customer.getFullName() + " [ID:" + customer.getId() + "] Reason for failure: Attempt to access unauthorized account.");
                         System.out.println("You don't own that account! Please try again.");
                     }
                 } else {
+                    // error logging
                     fh.appendLog("EPMB_Error_Log", customer.getFullName() + " [ID:" + customer.getId() + "] Reason for failure: Attempt to access nonexistent account.");
                     System.out.println("Account not found. Please try again.");
                 }
             } catch (NumberFormatException e) {
+                // error logging
                 fh.appendLog("EPMB_Error_Log", customer.getFullName() + " [ID:" + customer.getId() + "] Reason for failure: Invalid format when specifying account number.");
                 System.out.println("Invalid account number. Please try again.");
             }
@@ -240,10 +275,17 @@ public class InputHandler extends UserInterface{
         return null;
     }
 
+    /**
+     *
+     * @return if the user requests to exit or logout
+     */
     private boolean leave(){
         return exit || logout;
     }
 
+    /**
+     * Ask for input until program is exited
+     */
     public void handleInput(){
         Scanner scan = new Scanner(System.in);
         while (!exit) {

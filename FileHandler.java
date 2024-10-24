@@ -4,6 +4,9 @@ import java.io.FileReader;
 import java.io.*;
 import java.util.*;
 
+/**
+ * Represents an object to handle file appending and creation.
+ */
 public class FileHandler extends UserInterface{
 
     /**
@@ -14,12 +17,14 @@ public class FileHandler extends UserInterface{
     public boolean loadFromCSV(String filename) {
         filename += ".csv";
         try (Scanner scan = new Scanner(new File(filename))) {
+            // get headers
             String[] headers = scan.nextLine().split(",");
             try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
                 CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
                         .setHeader(headers)
                         .setSkipHeaderRecord(true)
                         .build();
+                // collect customer's info and accounts per each record
                 for (CSVRecord record : csvFormat.parse(reader)) {
                     Customer newCustomer = createCustomer(record, headers);
                     customers.put(newCustomer.getId()+newCustomer.getFirstName()+newCustomer.getLastName(), newCustomer);
@@ -35,6 +40,13 @@ public class FileHandler extends UserInterface{
         }
     }
 
+    /**
+     * Create a customer based on a record and possible headers.
+     *
+     * @param record    customers information
+     * @param HEADERS   possible headers
+     * @return          Customer object of its appropriate attributes
+     */
     private Customer createCustomer(CSVRecord record, String[] HEADERS) {
         int idNum = Integer.parseInt(record.get(HEADERS[0]));
         String firstName = record.get(HEADERS[1]).toLowerCase();
@@ -42,7 +54,7 @@ public class FileHandler extends UserInterface{
         String dob = record.get(HEADERS[3]);
         String address = record.get(HEADERS[4]).replace("\"", "");
         String phoneNum = record.get(HEADERS[5]).replaceAll("[()\\s-]", "");
-
+        // add customer and its accounts
         Customer customer = new Customer(idNum, firstName, lastName, dob, address, phoneNum);
         customer.addAccount(new Checking(Integer.parseInt(record.get(HEADERS[6])), Double.parseDouble(record.get(HEADERS[7]))));
         customer.addAccount(new Savings(Integer.parseInt(record.get(HEADERS[8])), Double.parseDouble(record.get(HEADERS[9]))));
@@ -51,6 +63,11 @@ public class FileHandler extends UserInterface{
         return customer;
     }
 
+    /**
+     * Add provided account to respective dictionary
+     *
+     * @param account provided account to add
+     */
     private void addAccountToMaps(Account account) {
         if (account instanceof Checking) {
             checkingAccounts.put(account.getAccountNumber(), (Checking) account);
@@ -60,7 +77,6 @@ public class FileHandler extends UserInterface{
             creditAccounts.put(account.getAccountNumber(), (Credit) account);
         }
     }
-
 
     /**
      * Update csv.
@@ -197,9 +213,11 @@ public class FileHandler extends UserInterface{
      */
     public void appendLog(String filename, String msg) {
         try (FileWriter myWriter = new FileWriter(filename + ".txt", true)) {
+            // append message to text file
             myWriter.write(msg + System.lineSeparator());
         } catch (IOException e) {
             System.out.println("An error occurred while writing to the log file: " + e.getMessage());
         }
     }
+
 }

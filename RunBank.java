@@ -13,6 +13,7 @@ public class RunBank {
         InputHandler ui = new InputHandler();
         ui.displayWelcomeMessage();
         ui.handleInput();
+        // export once terminated
         fh.exportToCSV("EPMB_Report");
     }
 }

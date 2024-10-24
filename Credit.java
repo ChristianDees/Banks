@@ -35,6 +35,10 @@ public class Credit extends Account{
         return false;
     }
 
+    /**
+     *
+     * @return an accounts maximum credit limit
+     */
     public int getCreditMax(){
         return this.creditMax;
     }
