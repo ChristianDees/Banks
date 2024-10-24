@@ -186,6 +186,7 @@ public class TransactionInputHandler extends UserInterface {
                         " Account Two Current Balance: $" + String.format("%.2f", accountTwo.getBalance());
                 if (rc) {
                     fh.appendLog("EPMB_Transactions", logMessage);
+                    return;
                 } else {
                     // error logging
                     fh.appendLog("EPMB_Error_Log", logMessage + " Reason for failure: Insufficient funds.");
