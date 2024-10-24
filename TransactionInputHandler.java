@@ -15,10 +15,12 @@ public class TransactionInputHandler extends UserInterface {
      * @param fh        file handler to handle logging
      */
     private void depositAmount(Scanner scan, Customer customer, Account account, FileHandler fh) {
+        // three attempts allowed
         for (int attempts = 0; attempts < 3; attempts++) {
             System.out.print("Enter deposit amount: \n$");
             String depositAmountStr = scan.nextLine();
             double depositAmount = this.validateMoney(depositAmountStr);
+            // if successful
             if (depositAmount >= 0) {
                 account.deposit(depositAmount, false);
                 account.printAccount(true, true);
@@ -26,9 +28,11 @@ public class TransactionInputHandler extends UserInterface {
                         " to " + account.getType() + " account [Account Number: " + account.getAccountNumber() + "]. Current balance: $" + String.format("%.2f", account.getBalance()));
                 return;
             } else {
+                // error logging
                 System.out.println("Invalid format. Please try again.");
             }
         }
+        // error logging
         fh.appendLog("EPMB_Error_Log", customer.getFullName() + " [ID:" + customer.getId() + "] reached maximum attempts.");
         System.out.println("Maximum attempts reached. Returning to main menu.");
     }
@@ -42,11 +46,13 @@ public class TransactionInputHandler extends UserInterface {
      * @param fh        file handler to handle logging
      */
     private void withdrawAmount(Scanner scan, Customer customer, Account account, FileHandler fh) {
+        // three attempts allowed
         for (int attempts = 0; attempts < 3; attempts++) {
             System.out.print("Enter withdrawal amount: \n$");
             String withdrawAmountStr = scan.nextLine();
             double withdrawAmount = this.validateMoney(withdrawAmountStr);
             if (withdrawAmount >= 0) {
+                // withdraw amount from an account
                 boolean success = account.withdraw(withdrawAmount, false);
                 account.printAccount(true, true);
                 String logMessage = customer.getFullName() + " [ID:" + customer.getId() + "] attempted a withdrawal of $" + String.format("%.2f", withdrawAmount) +
@@ -54,10 +60,12 @@ public class TransactionInputHandler extends UserInterface {
                 if (success) {
                     fh.appendLog("EPMB_Transactions", logMessage);
                 } else {
+                    // error logging
                     fh.appendLog("EPMB_Error_Log", logMessage + " Reason for failure: Insufficient funds.");
                 }
                 return;
             } else {
+                // error logging
                 fh.appendLog("EPMB_Error_Log", customer.getFullName() + " [ID:" + customer.getId() + "] attempted a withdrawal from " +
                         account.getType() + " account [Account Number:" + account.getAccountNumber() + "]. Reason for failure: Inappropriate formatting. Current balance: $" + String.format("%.2f", account.getBalance()));
                 System.out.println("Invalid format. Please try again.");
@@ -66,7 +74,6 @@ public class TransactionInputHandler extends UserInterface {
         fh.appendLog("EPMB_Error_Log", customer.getFullName() + " [ID:" + customer.getId() + "] reached maximum attempts.");
         System.out.println("Maximum attempts reached. Returning to main menu.");
     }
-
 
     /**
      * Handle a transaction with one account.
@@ -80,6 +87,7 @@ public class TransactionInputHandler extends UserInterface {
         customer.viewAccounts(false);
         Account account = ih.getAccountForTransaction(scan, customer, fh);
         if (account == null) return;
+        // three attempts allowed
         for (int attempts = 0; attempts < 3; attempts++) {
             System.out.print("Choose an action:\nA. Inquire Account Details\nB. Deposit\nC. Withdraw\nD. Transfer\n> ");
             String input = scan.nextLine().trim().toLowerCase();
@@ -100,6 +108,7 @@ public class TransactionInputHandler extends UserInterface {
                     TwoAccountTransaction(scan, customer, account, true, fh);
                     return;
                 default:
+                    // error logging
                     fh.appendLog("EPMB_Error_Log", customer.getFullName() + " [ID:" + customer.getId() + "] Reason for failure: Failed to choose appropriate transaction option.");
                     System.out.println("Invalid choice.");
             }
@@ -119,6 +128,7 @@ public class TransactionInputHandler extends UserInterface {
         boolean send = !transfer;
         InputHandler ih = new InputHandler();
         if (send) customerOne.viewAccounts(false);
+        // get first account if not provided
         if (accountOne == null) {
             accountOne = ih.getAccountForTransaction(scan, customerOne, fh);
             if (accountOne == null) return;
@@ -126,6 +136,7 @@ public class TransactionInputHandler extends UserInterface {
         Account accountTwo;
         Customer customerTwo;
         if (send) {
+            // get second account
             System.out.println("Please enter the following for the receiving account:\n" + "-".repeat(51));
             customerTwo = ih.getUserName(scan, true, false, fh);
             if (customerTwo == null) return;
@@ -134,17 +145,29 @@ public class TransactionInputHandler extends UserInterface {
             accountTwo = ih.getAccountForTransaction(scan, customerOne, fh);
         }
         if (accountTwo == null) return;
+        // perform transfer/send
         if (transfer) {
             this.transferAmount(scan, customerOne, accountOne, accountTwo, fh);
         } else {
             this.sendAmount(scan, customerOne, accountOne, accountTwo, fh);
         }    }
 
+    /**
+     * Send money from one account to another account of the same owner.
+     *
+     * @param scan          Scanner object for input.
+     * @param customer      Customer object for owner of the account.
+     * @param accountOne    Source account for the transaction.
+     * @param accountTwo    Destination account for the transaction.
+     * @param fh            File handler for logging.
+     */
     private void transferAmount(Scanner scan, Customer customer, Account accountOne, Account accountTwo, FileHandler fh) {
+        // three attempts allowed
         for (int attempts = 0; attempts < 3; attempts++) {
             System.out.print("Enter transfer amount: \n$");
             String transferAmountStr = scan.nextLine();
             double transferAmount = this.validateMoney(transferAmountStr);
+            // if successful
             if (transferAmount >= 0) {
                 boolean rc = customer.transfer(accountOne, accountTwo, transferAmount);
                 String logMessage = customer.getFullName() + " [ID:" + customer.getId() + "] attempted a transfer of $" + String.format("%.2f", transferAmount) +
@@ -155,23 +178,37 @@ public class TransactionInputHandler extends UserInterface {
                 if (rc) {
                     fh.appendLog("EPMB_Transactions", logMessage);
                 } else {
+                    // error logging
                     fh.appendLog("EPMB_Error_Log", logMessage + " Reason for failure: Insufficient funds.");
                 }
             } else {
+                // error logging
                 fh.appendLog("EPMB_Error_Log", customer.getFullName() + " [ID:" + customer.getId() + "] attempted a transfer of $" + transferAmountStr + " from " +
                         accountOne.getType() + " to " + accountTwo.getType() + " Reason for failure: Inappropriate format.");
                 System.out.println("Invalid format. Please try again.");
             }
         }
+        // error logging
         fh.appendLog("EPMB_Error_Log", customer.getFullName() + " [ID:" + customer.getId() + "] reached maximum attempts.");
         System.out.println("Maximum attempts reached. Returning to main menu.");
     }
 
+    /**
+     * Send money from one user's account to another user's account
+     *
+     * @param scan          Scanner object for input.
+     * @param customerOne   Customer object for owner of the source account.
+     * @param accountOne    Source account for the transaction.
+     * @param accountTwo    Destination account for the transaction.
+     * @param fh            File handler for logging.
+     */
     private void sendAmount(Scanner scan, Customer customerOne, Account accountOne, Account accountTwo, FileHandler fh) {
+        // three attempts allowed
         for (int attempts = 0; attempts < 3; attempts++) {
             System.out.print("Enter amount to be sent: \n$");
             String sendAmountStr = scan.nextLine();
             double sendAmount = this.validateMoney(sendAmountStr);
+            // if successful
             if (sendAmount >= 0) {
                 boolean rc = customerOne.send(accountOne, accountTwo, sendAmount);
                 String logMessage = customerOne.getFullName() + " [ID:" + customerOne.getId() + "] attempted to send $" + String.format("%.2f", sendAmount) +
@@ -182,14 +219,17 @@ public class TransactionInputHandler extends UserInterface {
                     fh.appendLog("EPMB_Transactions", logMessage);
                     return;
                 } else {
+                    // error logging
                     fh.appendLog("EPMB_Error_Log", logMessage + " Reason for failure: Insufficient funds.");
                 }
             } else {
+                // error logging
                 fh.appendLog("EPMB_Error_Log", customerOne.getFullName() + " [ID:" + customerOne.getId() + "] attempted to send $" + String.format("%.2f", sendAmount) +
                         " from " + accountOne.getType() + " account [Account Number:" + accountOne.getAccountNumber() + "] to " + customerOne.getFullName() + " [ID:" + customerOne.getId() + "] " + accountTwo.getType() + " account [Account Number:" + accountTwo.getAccountNumber() + "]. Reason for Failure: Inappropriate format.");
                 System.out.println("Invalid amount. Please try again.");
             }
         }
+        // error logging
         fh.appendLog("EPMB_Error_Log", customerOne.getFullName() + " [ID:" + customerOne.getId() + "] reached maximum attempts.");
         System.out.println("Maximum attempts reached. Returning to main menu.");
     }
@@ -207,6 +247,12 @@ public class TransactionInputHandler extends UserInterface {
                         "credit".equalsIgnoreCase(accType) ? creditAccounts.get(accNum) : null;
     }
 
+    /**
+     * Check if the format provided fits correct money format.
+     *
+     * @param input The input of money.
+     * @return      If format is valid or not.
+     */
     private double validateMoney(String input) {
         boolean correctFormat = Pattern.matches("^(\\d{1,3}(,\\d{3})*(\\.\\d{1,2})?|\\d+(\\.\\d{1,2})?)$", input);
         if (correctFormat)

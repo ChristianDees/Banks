@@ -36,6 +36,7 @@ public class Credit extends Account{
     }
 
     /**
+     * Get the maximum credit limit of an account.
      *
      * @return an accounts maximum credit limit
      */
