@@ -88,131 +88,83 @@ public class FileHandler extends UserInterface{
     }
 
     /**
-     * Update csv.
+     * Export all customers to a csv file.
      *
-     * @param filename the filename.
+     * @param filename the filename to exported to.
      */
     public void exportToCSV(String filename) {
-        // setup filename
         filename += ".csv";
-        HashMap<String, String[]> existingData = new HashMap<>();
-        // get current data
-        try (Scanner scan = new Scanner(new FileReader(filename))) {
-            String headerLine = scan.nextLine();
-            String[] headers = headerLine.split(",");
-            // get index of id col
-            int idColumnIndex = -1;
-            for (int i = 0; i < headers.length; i++) {
-                if (headers[i].equalsIgnoreCase("ID")) {
-                    idColumnIndex = i;
-                    break;
-                }
-            }
-            // no id col
-            if (idColumnIndex == -1) {
-                System.out.println("Error: ID column does not exist within the file.");
-                return;
-            }
-            // get current data
-            while (scan.hasNextLine()) {
-                String line = scan.nextLine();
-                String[] values = line.split(",");
-                // must fit for headers
-                if (values.length > idColumnIndex) {
-                    String id = values[idColumnIndex];
-                    existingData.put(id, values);
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Error reading the existing CSV file: " + e.getMessage());
-        }
-        // start writing
-        try (FileWriter writer = new FileWriter(filename, false)) { // Overwrite file
+        // write to file
+        try (FileWriter writer = new FileWriter(filename, false)) {
             String[] headers = {
-                    "ID",
-                    "First Name",
-                    "Last Name",
-                    "Date of Birth",
-                    "Address",
-                    "Phone Number",
-                    "Checking Account Number",
-                    "Checking Current Balance",
-                    "Savings Account Number",
-                    "Savings Current Balance",
-                    "Credit Account Number",
-                    "Credit Max",
-                    "Credit Current Balance"
+                    "ID", "First Name", "Last Name", "Date of Birth", "Address",
+                    "Phone Number", "Checking Account Number", "Checking Current Balance",
+                    "Savings Account Number", "Savings Current Balance",
+                    "Credit Account Number", "Credit Max", "Credit Current Balance"
             };
-            // write headers
-            writer.write(String.join(",", headers));
-            writer.write(System.lineSeparator());
-            // iterate over customers
-            Enumeration<String> keys = customers.keys();
-            while (keys.hasMoreElements()) {
-                String key = keys.nextElement();
+            // write hardcoded headers
+            writer.write(String.join(",", headers) + System.lineSeparator());
+            // iterate customers data to add
+            for (String key : Collections.list(customers.keys())) {
                 Customer customer = customers.get(key);
-                // get new values
-                String[] currentValues = new String[headers.length];
-                currentValues[0] = String.valueOf(customer.getId());
-                currentValues[1] = customer.getFirstName();
-                currentValues[2] = customer.getLastName();
-                currentValues[3] = customer.getDob();
-                currentValues[4] = customer.getAddress();
-                currentValues[5] = customer.getPhoneNum();
-                // setup accounts
+                String[] customerData = new String[headers.length];
+                customerData[0] = String.valueOf(customer.getId());
+                customerData[1] = capitalize(customer.getFirstName());
+                customerData[2] = capitalize(customer.getLastName());
+                customerData[3] = customer.getDob();
+                customerData[4] = escapeValue(customer.getAddress());
+                customerData[5] = customer.getPhoneNum();
                 String checkingAccountNumber = "", checkingBalance = "";
                 String savingsAccountNumber = "", savingsBalance = "";
-                String creditAccountNumber = "", creditMax = "", creditBalance = "";
-                // get customer's accounts
-                ArrayList<Account> accounts = customer.getAccounts();
-                if (accounts != null) {
-                    for (Account account : accounts) {
-                        if (account instanceof Checking checking) {
-                            checkingAccountNumber = String.valueOf(checking.getAccountNumber());
-                            checkingBalance = String.format("%.2f", checking.getBalance());
-                        } else if (account instanceof Savings savings) {
-                            savingsAccountNumber = String.valueOf(savings.getAccountNumber());
-                            savingsBalance = String.format("%.2f", savings.getBalance());
-                        } else if (account instanceof Credit credit) {
-                            creditAccountNumber = String.valueOf(credit.getAccountNumber());
-                            creditMax = String.valueOf(credit.getCreditMax());
-                            creditBalance = String.format("%.2f", credit.getBalance());
-                        }
+                String creditAccountNumber = "", creditBalance = "", creditMaxValue = "";
+                for (Account account : customer.getAccounts()) {
+                    if (account instanceof Checking checking) {
+                        checkingAccountNumber = String.valueOf(checking.getAccountNumber());
+                        checkingBalance = String.format("%.2f", checking.getBalance());
+                    } else if (account instanceof Savings savings) {
+                        savingsAccountNumber = String.valueOf(savings.getAccountNumber());
+                        savingsBalance = String.format("%.2f", savings.getBalance());
+                    } else if (account instanceof Credit credit) {
+                        creditAccountNumber = String.valueOf(credit.getAccountNumber());
+                        creditBalance = String.format("%.2f", credit.getBalance());
+                        creditMaxValue = String.valueOf(credit.getCreditMax());
                     }
                 }
-                // get new information
-                currentValues[6] = checkingAccountNumber;
-                currentValues[7] = checkingBalance;
-                currentValues[8] = savingsAccountNumber;
-                currentValues[9] = savingsBalance;
-                currentValues[10] = creditAccountNumber;
-                currentValues[11] = creditMax;
-                currentValues[12] = creditBalance;
-                // get current vals
-                String[] existingValues = existingData.get(currentValues[0]);
-                if (existingValues != null) {
-                    // check if worth updating
-                    for (int i = 0; i < headers.length; i++) {
-                        if (i < existingValues.length) { // check out of bounds
-                            if (!currentValues[i].equals(existingValues[i])) {
-                                existingValues[i] = currentValues[i]; // update if different
-                            }
-                        }
-                    }
-                } else {
-                    // if user is new
-                    existingData.put(currentValues[0], currentValues);
-                }
-            }
-            // write all updated or new entries back to the file
-            for (String[] values : existingData.values()) {
-                writer.write(String.join(",", values));
-                writer.write(System.lineSeparator());
+                customerData[6] = checkingAccountNumber;
+                customerData[7] = checkingBalance;
+                customerData[8] = savingsAccountNumber;
+                customerData[9] = savingsBalance;
+                customerData[10] = creditAccountNumber;
+                customerData[11] = creditMaxValue;
+                customerData[12] = creditBalance;
+                writer.write(String.join(",", customerData) + System.lineSeparator());
             }
             System.out.println("\n* * * Successfully exported data to " + filename + " * * *");
         } catch (IOException e) {
-            System.out.println("An error occurred while writing to the log file: " + e.getMessage());
+            System.out.println("An error occurred while writing to the CSV file: " + e.getMessage());
         }
+    }
+
+    /**
+     * Capitalize first letter of a string.
+     *
+     * @param   str String to have first letter capitalized
+     * @return  String after first letter is capitalized
+     */
+    private String capitalize(String str) {
+        return str.substring(0, 1).toUpperCase() + str.substring(1);
+    }
+
+    /**
+     * Add quotes around strings with commas.
+     *
+     * @param value is the string with commas
+     */
+    private String escapeValue(String value) {
+        if (value.contains(",")) {
+            return "\"" + value.replace("\"", "\"\"") + "\""; // Escape double quotes by doubling them
+        }
+        return value;
     }
 
     /**
@@ -228,5 +180,4 @@ public class FileHandler extends UserInterface{
             System.out.println("An error occurred while writing to the log file: " + e.getMessage());
         }
     }
-
 }
