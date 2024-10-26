@@ -4,19 +4,20 @@
 // Course: CS 3331 - Advanced Object-Oriented Programming - Fall 2024
 // Instructor: Dr. Bhanukiran Gurijala
 // Assignment: Programming Assignment 1 (Project Part 1)
-// Lab Description: This lab is meant to demonstrate our knowledge in object-oriented concepts such as inheritance, polymorphism, UML diagrams, and more through coding our own implementation of a bank system of which deposits, withdraws, transfers, and pays. This lab also included concepts of logging, testing, debugging, file reading, and JavaDoc.
-// Honesty Statement: We affirm that we have completed this assignment entirely on our own, without any assistance from outside sources, including peers, experts, online resources, or other means. All code and ideas were that of our own work and we have followed proper academic integrity.
+// Lab Description: This lab is meant to demonstrate our knowledge in object-oriented concepts such as inheritance, polymorphism, UML diagrams, and more through coding our own implementation of a bank system of which deposits, withdraws, transfer, and pays. This lab also included concepts of logging, testing, debugging, file reading, and JavaDoc.
+// Honesty Statement: We affirm that we have completed this assignment entirely on our own, without any assistance from outside sources, including peers, experts, online resources, or other means. All code and ideas were that of our own work, and we have followed proper academic integrity.
  */
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import java.io.FileReader;
 import java.io.*;
 import java.util.*;
+import static java.lang.System.out;
 
 /**
  * Represents an object to handle file appending and creation.
  */
-public class FileHandler extends UserInterface{
+public class FileHandler extends BankRegistry{
 
     /**
      * Load from csv.
@@ -35,41 +36,45 @@ public class FileHandler extends UserInterface{
                         .build();
                 // collect customer's info and accounts per each record
                 for (CSVRecord record : csvFormat.parse(reader)) {
-                    Customer newCustomer = createCustomer(record, headers);
-                    customers.put(newCustomer.getId()+newCustomer.getFirstName()+newCustomer.getLastName(), newCustomer);
-                    for (Account account : newCustomer.getAccounts()) {
-                        addAccountToMaps(account);
-                    }
+                    if(!addCustomer(record, headers)) out.println("Failed to add customer.");
                 }
                 return true;
             }
         } catch (IOException e) {
-            System.out.println("Error loading from file: " + e.getMessage());
+            out.println("Error loading from file: " + e.getMessage());
             return false;
         }
     }
 
-    /**
-     * Create a customer based on a record and possible headers.
-     *
-     * @param record    customers information
-     * @param HEADERS   possible headers
-     * @return          Customer object of its appropriate attributes
-     */
-    private Customer createCustomer(CSVRecord record, String[] HEADERS) {
-        int idNum = Integer.parseInt(record.get(HEADERS[0]));
-        String firstName = record.get(HEADERS[1]).toLowerCase();
-        String lastName = record.get(HEADERS[2]).toLowerCase();
-        String dob = record.get(HEADERS[3]);
-        String address = record.get(HEADERS[4]).replace("\"", "");
-        String phoneNum = record.get(HEADERS[5]).replaceAll("[()\\s-]", "");
+    boolean addCustomer(CSVRecord record, String[] headers) {
+        int idNum = Integer.parseInt(record.get(headers[0]));
+        String firstName = record.get(headers[1]).toLowerCase();
+        String lastName = record.get(headers[2]).toLowerCase();
+        String dob = record.get(headers[3]);
+        String address = record.get(headers[4]).replace("\"", "");
+        String phoneNum = record.get(headers[5]).replaceAll("[()\\s-]", "");
+        int checkingAccNum = Integer.parseInt(record.get(headers[6]));
+        double checkingStartBalance = Double.parseDouble(record.get(headers[7]));
+        int savingsAccNum = Integer.parseInt(record.get(headers[8]));
+        double savingsStartBalance = Double.parseDouble(record.get(headers[9]));
+        int creditAccNum = Integer.parseInt(record.get(headers[10]));
+        double creditStartBalance = Double.parseDouble(record.get(headers[12]));
+        int creditMax = Integer.parseInt(record.get(headers[11]));
         // add customer and its accounts
-        Customer customer = new Customer(idNum, firstName, lastName, dob, address, phoneNum);
-        customer.addAccount(new Checking(Integer.parseInt(record.get(HEADERS[6])), Double.parseDouble(record.get(HEADERS[7]))));
-        customer.addAccount(new Savings(Integer.parseInt(record.get(HEADERS[8])), Double.parseDouble(record.get(HEADERS[9]))));
-        customer.addAccount(new Credit(Integer.parseInt(record.get(HEADERS[10])), Double.parseDouble(record.get(HEADERS[12])), Integer.parseInt(record.get(HEADERS[11]))));
-
-        return customer;
+        boolean rc = customerIDs.add(idNum);
+        if(rc){
+            Customer newCustomer = new Customer(idNum, firstName, lastName, dob, address, phoneNum);
+            Checking checkingAcc = new Checking(checkingAccNum, checkingStartBalance);
+            Savings savingsAcc = new Savings(savingsAccNum, savingsStartBalance);
+            Credit creditAcc = new Credit(creditAccNum, creditStartBalance, creditMax);
+            if (addAccountToMaps(checkingAcc)) newCustomer.addAccount(checkingAcc);
+            if (addAccountToMaps(savingsAcc)) newCustomer.addAccount(savingsAcc);
+            if (addAccountToMaps(creditAcc)) newCustomer.addAccount(creditAcc);
+            customers.put(idNum+firstName+lastName, newCustomer);
+        } else {
+            this.appendLog("EPMB_Error_Log", "Failed to add user with id: " + idNum + ". Reason: User with that id already exists.");
+        }
+        return rc;
     }
 
     /**
@@ -77,14 +82,29 @@ public class FileHandler extends UserInterface{
      *
      * @param account provided account to add
      */
-    private void addAccountToMaps(Account account) {
-        if (account instanceof Checking) {
-            checkingAccounts.put(account.getAccountNumber(), (Checking) account);
-        } else if (account instanceof Savings) {
-            savingAccounts.put(account.getAccountNumber(), (Savings) account);
-        } else if (account instanceof Credit) {
-            creditAccounts.put(account.getAccountNumber(), (Credit) account);
+    public boolean addAccountToMaps(Account account) {
+        boolean rc = false;
+        int accountNum = account.getAccountNumber();
+        String err = "Failed to add account with account number: " + accountNum + ". Reason: Account with that account number already exists.";
+        switch (account) {
+            case Checking ignored -> {
+                rc = checkingAccNums.add(accountNum);
+                if (rc) checkingAccounts.put(accountNum, (Checking) account);
+                else this.appendLog("EPMB_Error_Log", err);
+            }
+            case Savings ignored -> {
+                rc = savingsAccNums.add(accountNum);
+                if (rc) savingAccounts.put(accountNum, (Savings) account);
+                else this.appendLog("EPMB_Error_Log", err);
+            }
+            case Credit ignored -> {
+                rc = creditAccNums.add(accountNum);
+                if (rc) creditAccounts.put(accountNum, (Credit) account);
+                else this.appendLog("EPMB_Error_Log", err);
+            }
+            default -> this.appendLog("EPMB_Error_Log", "Failed to add account with account number: " + accountNum + ". Reason: Account with that type does not exist.");
         }
+        return rc;
     }
 
     /**
@@ -96,21 +116,15 @@ public class FileHandler extends UserInterface{
         filename += ".csv";
         // write to file
         try (FileWriter writer = new FileWriter(filename, false)) {
-            String[] headers = {
-                    "ID", "First Name", "Last Name", "Date of Birth", "Address",
-                    "Phone Number", "Checking Account Number", "Checking Current Balance",
-                    "Savings Account Number", "Savings Current Balance",
-                    "Credit Account Number", "Credit Max", "Credit Current Balance"
-            };
             // write hardcoded headers
-            writer.write(String.join(",", headers) + System.lineSeparator());
+            writer.write(String.join(",", defaultHeaders) + System.lineSeparator());
             // iterate customers data to add
             for (String key : Collections.list(customers.keys())) {
                 Customer customer = customers.get(key);
-                String[] customerData = new String[headers.length];
+                String[] customerData = new String[defaultHeaders.length];
                 customerData[0] = String.valueOf(customer.getId());
-                customerData[1] = capitalize(customer.getFirstName());
-                customerData[2] = capitalize(customer.getLastName());
+                customerData[1] = capitalizeFirst(customer.getFirstName());
+                customerData[2] = capitalizeFirst(customer.getLastName());
                 customerData[3] = customer.getDob();
                 customerData[4] = escapeValue(customer.getAddress());
                 customerData[5] = customer.getPhoneNum();
@@ -139,20 +153,10 @@ public class FileHandler extends UserInterface{
                 customerData[12] = creditBalance;
                 writer.write(String.join(",", customerData) + System.lineSeparator());
             }
-            System.out.println("\n* * * Successfully exported data to " + filename + " * * *");
+            out.println("\n* * * Successfully exported data to " + filename + " * * *");
         } catch (IOException e) {
-            System.out.println("An error occurred while writing to the CSV file: " + e.getMessage());
+            out.println("An error occurred while writing to the CSV file: " + e.getMessage());
         }
-    }
-
-    /**
-     * Capitalize first letter of a string.
-     *
-     * @param   str String to have first letter capitalized
-     * @return  String after first letter is capitalized
-     */
-    private String capitalize(String str) {
-        return str.substring(0, 1).toUpperCase() + str.substring(1);
     }
 
     /**
@@ -177,7 +181,8 @@ public class FileHandler extends UserInterface{
             // append message to text file
             myWriter.write(msg + System.lineSeparator());
         } catch (IOException e) {
-            System.out.println("An error occurred while writing to the log file: " + e.getMessage());
+            out.println("An error occurred while writing to the log file: " + e.getMessage());
         }
     }
+
 }

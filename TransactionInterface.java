@@ -4,16 +4,18 @@
 // Course: CS 3331 - Advanced Object-Oriented Programming - Fall 2024
 // Instructor: Dr. Bhanukiran Gurijala
 // Assignment: Programming Assignment 1 (Project Part 1)
-// Lab Description: This lab is meant to demonstrate our knowledge in object-oriented concepts such as inheritance, polymorphism, UML diagrams, and more through coding our own implementation of a bank system of which deposits, withdraws, transfers, and pays. This lab also included concepts of logging, testing, debugging, file reading, and JavaDoc.
-// Honesty Statement: We affirm that we have completed this assignment entirely on our own, without any assistance from outside sources, including peers, experts, online resources, or other means. All code and ideas were that of our own work and we have followed proper academic integrity.
+// Lab Description: This lab is meant to demonstrate our knowledge in object-oriented concepts such as inheritance, polymorphism, UML diagrams, and more through coding our own implementation of a bank system of which deposits, withdraws, transfer, and pays. This lab also included concepts of logging, testing, debugging, file reading, and JavaDoc.
+// Honesty Statement: We affirm that we have completed this assignment entirely on our own, without any assistance from outside sources, including peers, experts, online resources, or other means. All code and ideas were that of our own work, and we have followed proper academic integrity.
  */
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.regex.Pattern;
+import static java.lang.System.out;
 
 /**
  * The type Transaction input handler.
  */
-public class TransactionInputHandler extends UserInterface {
+public class TransactionInterface extends UserInterface {
 
     /**
      * Ask user for how much money to deposit.
@@ -92,9 +94,8 @@ public class TransactionInputHandler extends UserInterface {
      * @param fh       the fh
      */
     public void oneAccountTransaction(Scanner scan, Customer customer, FileHandler fh) {
-        InputHandler ih = new InputHandler();
         customer.viewAccounts(false);
-        Account account = ih.getAccountForTransaction(scan, customer, fh);
+        Account account = getAccountForTransaction(scan, customer, fh);
         if (account == null) return;
         // three attempts allowed
         for (int attempts = 0; attempts < 3; attempts++) {
@@ -135,11 +136,11 @@ public class TransactionInputHandler extends UserInterface {
      */
     public void TwoAccountTransaction(Scanner scan, Customer customerOne, Account accountOne, boolean transfer, FileHandler fh) {
         boolean send = !transfer;
-        InputHandler ih = new InputHandler();
+        MainInterface ih = new MainInterface();
         if (send) customerOne.viewAccounts(false);
         // get first account if not provided
         if (accountOne == null) {
-            accountOne = ih.getAccountForTransaction(scan, customerOne, fh);
+            accountOne = getAccountForTransaction(scan, customerOne, fh);
             if (accountOne == null) return;
         }
         Account accountTwo;
@@ -149,9 +150,9 @@ public class TransactionInputHandler extends UserInterface {
             System.out.println("Please enter the following for the receiving account:\n" + "-".repeat(51));
             customerTwo = ih.getUserName(scan, true, false, fh);
             if (customerTwo == null) return;
-            accountTwo = ih.getAccountForTransaction(scan, customerTwo, fh);
+            accountTwo = getAccountForTransaction(scan, customerTwo, fh);
         } else {
-            accountTwo = ih.getAccountForTransaction(scan, customerOne, fh);
+            accountTwo = getAccountForTransaction(scan, customerOne, fh);
         }
         if (accountTwo == null) return;
         // perform transfer/send
@@ -269,4 +270,54 @@ public class TransactionInputHandler extends UserInterface {
             return Double.parseDouble(input.replace(",", ""));
         return -1;
     }
+
+    /**
+     * Ask user for an account and return it.
+     *
+     * @param scan          The scanner object to continue taking input.
+     * @param customer      The customer who is answering the question.
+     */
+    private Account getAccountForTransaction(Scanner scan, Customer customer, FileHandler fh) {
+        // three attempts
+        for (int attempts = 0; attempts < 3; attempts++) {
+            out.print("Specify the account (type, number):\n> ");
+            String input = scan.nextLine().trim().toLowerCase();
+            String[] parts = input.split(",");
+            if (checkExit(input)) return null;
+            if (parts.length != 2) {
+                // error logging
+                fh.appendLog("EPMB_Error_Log", customer.getFullName() + " [ID:" + customer.getId() + "] Reason for failure: Invalid format when specifying account.");
+                out.println("Invalid format.");
+                continue;
+            }
+            String accType = parts[0].trim();
+            try {
+                int accNum = Integer.parseInt(parts[1].trim());
+                TransactionInterface th = new TransactionInterface();
+                Account account = th.getAccount(accType, accNum);
+                if (account != null) {
+                    ArrayList<Account> accounts = customer.accounts;
+                    if (accounts.contains(account)) {
+                        // access account
+                        fh.appendLog("EPMB_Transactions", customer.getFullName() + " [ID:" + customer.getId() + "] accessed account " + account.getType() + " " + "[Account Number:" + account.getAccountNumber() + "]");
+                        return account;
+                    }else {
+                        // error logging
+                        fh.appendLog("EPMB_Error_Log", customer.getFullName() + " [ID:" + customer.getId() + "] Reason for failure: Attempt to access unauthorized account.");
+                        out.println("You don't own that account! Please try again.");
+                    }
+                } else {
+                    // error logging
+                    fh.appendLog("EPMB_Error_Log", customer.getFullName() + " [ID:" + customer.getId() + "] Reason for failure: Attempt to access nonexistent account.");
+                    out.println("Account not found. Please try again.");
+                }
+            } catch (NumberFormatException e) {
+                // error logging
+                fh.appendLog("EPMB_Error_Log", customer.getFullName() + " [ID:" + customer.getId() + "] Reason for failure: Invalid format when specifying account number.");
+                out.println("Invalid account number. Please try again.");
+            }
+        }
+        return null;
+    }
+
 }
