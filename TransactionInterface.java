@@ -101,7 +101,7 @@ public class TransactionInterface extends UserInterface {
         for (int attempts = 0; attempts < 3; attempts++) {
             System.out.print("Choose an action:\nA. Inquire Account Details\nB. Deposit\nC. Withdraw\nD. Transfer\n> ");
             String input = scan.nextLine().trim().toLowerCase();
-            if (checkExit(input)) return;
+            if (logout(input)) return;
             switch (input) {
                 case "a":
                     fh.appendLog("EPMB_Transactions", customer.getFullName() + " [ID:" + customer.getId() + "] viewed the details of " + account.getType() + " account [Account Number:" + account.getAccountNumber() +
@@ -283,7 +283,7 @@ public class TransactionInterface extends UserInterface {
             out.print("Specify the account (type, number):\n> ");
             String input = scan.nextLine().trim().toLowerCase();
             String[] parts = input.split(",");
-            if (checkExit(input)) return null;
+            if (logout(input)) return null;
             if (parts.length != 2) {
                 // error logging
                 fh.appendLog("EPMB_Error_Log", customer.getFullName() + " [ID:" + customer.getId() + "] Reason for failure: Invalid format when specifying account.");

@@ -70,7 +70,7 @@ public class FileHandler extends BankRegistry{
             if (addAccountToMaps(checkingAcc)) newCustomer.addAccount(checkingAcc);
             if (addAccountToMaps(savingsAcc)) newCustomer.addAccount(savingsAcc);
             if (addAccountToMaps(creditAcc)) newCustomer.addAccount(creditAcc);
-            customers.put(idNum+firstName+lastName, newCustomer);
+            customers.put(firstName+lastName, newCustomer);
         } else {
             this.appendLog("EPMB_Error_Log", "Failed to add user with id: " + idNum + ". Reason: User with that id already exists.");
         }

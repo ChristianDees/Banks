@@ -25,7 +25,7 @@ public class ManagerInterface extends UserInterface{
             // provide options
             out.print("A. Inquire accounts by customer name and id.\nB. Inquire account by type/number.\n> ");
             String input = scan.nextLine().trim().toLowerCase();
-            if (checkExit(input)) return;
+            if (logout(input)) return;
             switch (input) {
                 case "a":
                     getUserName(scan, true, true, fh);
@@ -54,7 +54,7 @@ public class ManagerInterface extends UserInterface{
         for (int attempts = 0; attempts < 3; attempts++) {
             out.print("What is the account type? (checking/savings/credit):\n> ");
             String accType = scan.nextLine().trim();
-            if (checkExit(accType)) return null;
+            if (logout(accType)) return null;
             // get type of account the user entered
             if ("checking".equalsIgnoreCase(accType) || "savings".equalsIgnoreCase(accType) || "credit".equalsIgnoreCase(accType)){
                 fh.appendLog("EPMB_Transactions", "Manager accessed a " + accType + " account.");
@@ -78,7 +78,7 @@ public class ManagerInterface extends UserInterface{
         for (int attempts = 0; attempts < 3; attempts++) {
             out.print("What is the account number?\n> ");
             String input = scan.nextLine().trim();
-            if (checkExit(input)) return null;
+            if (logout(input)) return null;
             try {
                 // access account based on type and number
                 int accNum = Integer.parseInt(input);

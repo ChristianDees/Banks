@@ -25,6 +25,7 @@ public class CustomerInterface extends UserInterface{
         for (int i = 0; i < 3; i++){
             out.print("Are you an existing customer, or a new one?\nA. Existing customer\nB. New customer\n> ");
             String input = scan.nextLine().trim().toLowerCase();
+            if (logout(input)) return;
             switch (input){
                 case "a":
                     Customer customer = this.getUserName(scan, false, false, fh);
@@ -34,7 +35,7 @@ public class CustomerInterface extends UserInterface{
                             if (leave()) return;
                             out.print("Choose a transaction:\nA. Transaction between single person.\nB. Transaction between two people.\n> ");
                             input = scan.nextLine().trim().toLowerCase();
-                            if (checkExit(input)) return;
+                            if (logout(input)) return;
                             TransactionInterface transaction = new TransactionInterface();
                             switch (input) {
                                 case "a":

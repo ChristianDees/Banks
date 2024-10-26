@@ -11,7 +11,6 @@ import java.util.*;
 import static java.lang.System.out;
 
 public abstract class UserInterface extends BankRegistry {
-    public static boolean exit = false;
     public static boolean logout = false;
 
     /**
@@ -32,8 +31,8 @@ public abstract class UserInterface extends BankRegistry {
      * @param input         The scanner object to continue taking input.
      * @return              The status of if the program should be exited.
      */
-    public static boolean checkExit(String input) {
-        return (input.equalsIgnoreCase("exit") && (exit = true)) || (input.equalsIgnoreCase("logout") && (logout = true));
+    public static boolean logout(String input) {
+        return (input.equalsIgnoreCase("logout") && (logout = true));
     }
 
     /**
@@ -41,7 +40,7 @@ public abstract class UserInterface extends BankRegistry {
      * @return if the user requests to exit or logout
      */
     public boolean leave(){
-        return exit || logout;
+        return logout;
     }
 
     /**
@@ -54,19 +53,23 @@ public abstract class UserInterface extends BankRegistry {
         // three attempts
         for (int attempts = 0; attempts < 3; attempts++) {
             if(leave())return null;
-            out.print("Enter customer id and name (id, name):\n> ");
-            String input = scan.nextLine().trim();
-            if (checkExit(input)) return null;
-            String[] parts = input.split(",");
-            if (parts.length != 2) {
+            out.print("Customer's first name: ");
+            String firstName = scan.nextLine().trim().toLowerCase();
+            if (logout(firstName)) return null;
+            out.print("Customer's last name: ");
+            String lastName = scan.nextLine().trim().toLowerCase();
+            if (logout(lastName)) return null;
+
+
+            if (firstName.isEmpty() || lastName.isEmpty()) {
                 // error logging
                 fh.appendLog("EPMB_Error_Log", "Attempted to ask for user's name. Reason for failure: Invalid format of id, name.");
                 if (attempts < 2)
-                    out.println("Invalid format. Use 'id, name'.");
+                    out.println("Invalid format. Use 'first last'.");
                 continue;
             }
-            String formattedName = parts[0].trim() + parts[1].trim().toLowerCase().replace(" ", "");
-            if (!checkExit(formattedName)){
+            String formattedName = firstName+lastName;
+            if (!logout(formattedName)){
                 Customer customer = customers.get(formattedName);
                 if (customer != null){
                     if (viewAccounts)
