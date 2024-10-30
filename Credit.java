@@ -35,7 +35,7 @@ public class Credit extends Account{
      * **/
     public boolean withdraw(double amount, boolean suppressSuccess){
         double totalCharge = (amount + (0.025*amount)); // AVERAGE TRANSACTION FEE
-        if ((amount > 0) && ((this.balance - totalCharge) >= this.creditMax)) {
+        if ((amount > 0) && ((this.balance - totalCharge) <= this.creditMax)) {
             this.balance -= totalCharge;
             if (!suppressSuccess) System.out.println("*  *  *  *  *  *  *  Withdraw Successful  *  *  *  *  *  *  *\n");
             return true;
