@@ -7,9 +7,8 @@
 // Lab Description: This lab is meant to demonstrate our knowledge in object-oriented concepts such as inheritance, polymorphism, UML diagrams, and more through coding our own implementation of a bank system of which deposits, withdraws, transfer, and pays. This lab also included concepts of logging, testing, debugging, file reading, and JavaDoc.
 // Honesty Statement: We affirm that we have completed this assignment entirely on our own, without any assistance from outside sources, including peers, experts, online resources, or other means. All code and ideas were that of our own work, and we have followed proper academic integrity.
  */
-import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.Scanner;
+import java.util.*;
+
 import static java.lang.System.out;
 
 public class CustomerInterface extends UserInterface{
@@ -84,7 +83,7 @@ public class CustomerInterface extends UserInterface{
             }
             attempts++;
             fh.appendLog("EPMB_Error_Log", "Failed to input correct format: " + input);
-            out.println("Invalid input. Please try again.");
+            if (attempts < 3)out.println("Invalid input. Please try again.");
         }
         out.println("Maximum attempts reached, returning to main...");
         return null;
@@ -108,67 +107,36 @@ public class CustomerInterface extends UserInterface{
                 {"Zip Code: ", "\\d{5}"},
                 {"Phone Number: ", "\\d{10}"}
         };
-        String[] userInputs = new String[prompts.length];
+        List<String> recordFormatted = new ArrayList<>();
+        String[] record = new String[prompts.length + 1]; // +1 for the customer ID
+        record[0] = String.valueOf(customerIDs.last() + 1);
         for (int i = 0; i < prompts.length; i++) {
-            userInputs[i] = requestCustomerInfo(scan, prompts[i][0], prompts[i][1], fh);
-            if (userInputs[i] == null) return; // exit if invalid
+            record[i + 1] = requestCustomerInfo(scan, prompts[i][0], prompts[i][1], fh);
+            if (record[i + 1] == null)return;
         }
+        String formattedAddress = String.format("%s, %s, %s %s",
+                (record[4]),                // address
+                (record[5]),                // city
+                record[6].toUpperCase(),    // state
+                record[7]                   // zip
+        );
         // if everything checks out THEN add a new id
-        Dictionary<String, String> record = getStringStringDictionary(userInputs);
-        boolean rc = addCustomer(record);
+        recordFormatted.add(record[0]);                                     // id
+        recordFormatted.add(record[1]);                                     // first name
+        recordFormatted.add(record[2]);                                     // last name
+        recordFormatted.add(record[3]);                                     // dob
+        recordFormatted.add(formattedAddress);                              // address
+        recordFormatted.add(record[8]);
+        recordFormatted.add(String.valueOf(checkingAccNums.last() + 1)); // checking account number
+        recordFormatted.add(String.valueOf(0));                          // checking current balance
+        recordFormatted.add(String.valueOf(savingsAccNums.last() + 1));  // savings account number
+        recordFormatted.add(String.valueOf(0));                          // savings current balance
+        recordFormatted.add(String.valueOf(creditAccNums.last() + 1));   // credit account number
+        recordFormatted.add(String.valueOf(0));                          // credit current balance
+        recordFormatted.add(String.valueOf(0));                          // credit max
+        Dictionary<String, String> recordDict = fh.recordToDictionary(recordFormatted.toArray(new String[0]), defaultHeaders);
+        boolean rc = addCustomer(recordDict);
         if (rc) out.println("\n* * * Successfully added new customer. * * *\n");
         else out.println("\n* * * Failed to add new customer. * * *\n");
     }
-
-    /**
-     * @param userInputs list of all user inputs to the expected prompts.
-     * @return           dictionary of header mapped to input values.
-     */
-    private Dictionary<String, String> getStringStringDictionary(String[] userInputs) {
-        int idNum = customerIDs.last() + 1;
-        int checkingAccNum = checkingAccNums.last() + 1;
-        int checkingCurrBalance = 0;
-        int savingsAccNum = savingsAccNums.last() + 1;
-        int savingsCurrBalance = 0;
-        int creditAccNum = creditAccNums.last() + 1;
-        int creditAccBalance = 0;
-        int creditMax = 0; // CHANGE THIS
-        // add customer data to dictionary
-        String formattedAddress = String.format("%s, %s, %s %s",
-                capitalizeFirst(userInputs[3]), // address
-                capitalizeFirst(userInputs[4]), // city
-                userInputs[5].toUpperCase(),    // state
-                userInputs[6]                   // zip
-        );
-        Dictionary<String, String> record = new Hashtable<>();
-        record.put("ID", String.valueOf(idNum));
-        record.put("First Name", userInputs[0]);
-        record.put("Last Name", userInputs[1]);
-        record.put("Date of Birth", capitalizeMonth(userInputs[2]));
-        record.put("Address", formattedAddress);
-        record.put("Phone Number", userInputs[7]);
-        record.put("Checking Account Number", String.valueOf(checkingAccNum));
-        record.put("Checking Current Balance", String.valueOf(checkingCurrBalance));
-        record.put("Savings Account Number", String.valueOf(savingsAccNum));
-        record.put("Savings Current Balance", String.valueOf(savingsCurrBalance));
-        record.put("Credit Account Number", String.valueOf(creditAccNum));
-        record.put("Credit Max", String.valueOf(creditMax));
-        record.put("Credit Current Balance", String.valueOf(creditAccBalance));
-        return record;
-    }
-
-    /**
-     * Capitalizes the month within the format (day-month-year)
-     *
-     * @param date  string in the format (dd-month-yy).
-     * @return      formatted string.
-     */
-    private static String capitalizeMonth(String date) {
-        String[] parts = date.split("-");
-        if (parts.length > 1) {
-            parts[1] = parts[1].substring(0, 1).toUpperCase() + parts[1].substring(1);
-        }
-        return String.join("-", parts);
-    }
-
 }

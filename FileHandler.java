@@ -10,6 +10,8 @@
 import java.io.*;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import static java.lang.System.out;
 
 /**
@@ -68,7 +70,21 @@ public class FileHandler extends BankRegistry{
         filename += ".csv";
         // write to file
         try (FileWriter writer = new FileWriter(filename, false)) {
+            // format phone number (area code) 3digits-4digits
             Function<String, String> formatPhoneNumber = phoneNumber -> String.format("(%s) %s-%s", phoneNumber.substring(0, 3), phoneNumber.substring(3, 6), phoneNumber.substring(6));
+            // add quotes if string has commas
+            Function<String, String> escapeValue = value -> {
+                if (value.contains(","))return "\"" + value.replace("\"", "\"\"") + "\"";
+                return value;
+            };
+            // capitalize month in dob format
+            Function<String, String> capitalizeMonth = date -> {
+                String[] parts = date.split("-");
+                if (parts.length > 1)parts[1] = parts[1].substring(0, 1).toUpperCase() + parts[1].substring(1);
+                return String.join("-", parts);
+            };
+            // capitalize each word in a string
+            Function<String, String> capitalizeWords = input -> Arrays.stream(input.split("\\s+")).map(word -> Character.toTitleCase(word.charAt(0)) + word.substring(1)).collect(Collectors.joining(" "));
             // write hardcoded headers
             writer.write(String.join(",", defaultHeaders) + System.lineSeparator());
             // iterate customers data to add
@@ -76,10 +92,10 @@ public class FileHandler extends BankRegistry{
                 Customer customer = customers.get(key);
                 String[] customerData = new String[defaultHeaders.length];
                 customerData[0] = String.valueOf(customer.getId());
-                customerData[1] = capitalizeFirst(customer.getFirstName());
-                customerData[2] = capitalizeFirst(customer.getLastName());
-                customerData[3] = customer.getDob();
-                customerData[4] = escapeValue(customer.getAddress());
+                customerData[1] = capitalizeWords.apply(customer.getFirstName());
+                customerData[2] = capitalizeWords.apply(customer.getLastName());
+                customerData[3] = capitalizeMonth.apply((customer.getDob()));
+                customerData[4] = capitalizeWords.apply(escapeValue.apply(customer.getAddress()));
                 customerData[5] = formatPhoneNumber.apply(customer.getPhoneNum());
                 String checkingAccountNumber = "", checkingBalance = "";
                 String savingsAccountNumber = "", savingsBalance = "";
@@ -110,18 +126,6 @@ public class FileHandler extends BankRegistry{
         } catch (IOException e) {
             out.println("An error occurred while writing to the CSV file: " + e.getMessage());
         }
-    }
-
-    /**
-     * Add quotes around strings with commas.
-     *
-     * @param value is the string with commas
-     */
-    private String escapeValue(String value) {
-        if (value.contains(",")) {
-            return "\"" + value.replace("\"", "\"\"") + "\""; // Escape double quotes by doubling them
-        }
-        return value;
     }
 
     /**

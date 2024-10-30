@@ -43,10 +43,17 @@ public abstract class BankRegistry {
         int creditAccNum = Integer.parseInt(record.get(defaultHeaders[10]));
         int creditMax = Integer.parseInt(record.get(defaultHeaders[11]));
         double creditStartBalance = Double.parseDouble(record.get(defaultHeaders[12]));
-
+        /*
+            FUTURE: REMOVE THIS BECAUSE DUMB
+         */
+        FileHandler fh = new FileHandler();
+        if (customers.get(firstName+lastName)!=null){
+            System.out.println("-----A Customer with that name already exists!-----");
+            fh.appendLog("EPMB_Error_Log", "Failed to add user with id: " + idNum + ". Reason: User with that name already exists.");
+            return false;
+        }
         // add customer and its accounts
         boolean rc = customerIDs.add(idNum);
-        FileHandler fh = new FileHandler();
         if(!rc){
             fh.appendLog("EPMB_Error_Log", "Failed to add user with id: " + idNum + ". Reason: User with that id already exists.");
         } else {
@@ -61,25 +68,4 @@ public abstract class BankRegistry {
         }
         return rc;
     }
-
-    /**
-     * Capitalize first letter of a string.
-     *
-     * @param   str String to have first letter capitalized
-     * @return  String after first letter is capitalized
-     */
-    public static String capitalizeFirst(String str) {
-        StringBuilder capitalized = new StringBuilder();
-        String[] words = str.split("\\s+");
-
-        for (String word : words) {
-            if (!word.isEmpty()) {
-                capitalized.append(Character.toUpperCase(word.charAt(0)))
-                        .append(word.substring(1)).append(" ");
-            }
-        }
-
-        return capitalized.toString().trim();
-    }
-
 }
