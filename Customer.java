@@ -13,7 +13,7 @@ import java.util.ArrayList;
  * Represents a customer with their accounts, dob, address, phone number, and unique id number
  */
 public class Customer extends Person{
-    ArrayList<Account> accounts = new ArrayList<Account>();
+    ArrayList<Account> accounts = new ArrayList<>();
     String dob;
     String address;
     String phoneNum;
@@ -113,6 +113,19 @@ public class Customer extends Person{
     }
 
     /**
+     * Prints an account's information if it exists.
+     *
+     * @param viewBalance   Print the balance if true, don't if false.
+     */
+    public void viewAccount(Account account, boolean viewBalance) {
+        if (this.accounts.contains(account)){
+            account.printAccount(viewBalance, viewBalance);
+        } else {
+            System.out.println("This account does not belong to this owner!");
+        }
+    }
+
+    /**
      * Add account.
      *
      * @param account the account
@@ -164,5 +177,38 @@ public class Customer extends Person{
         }
         src.printAccount(true, true);
         return rc;
+    }
+
+    /**
+     * Withdraw an amount from an account, if customer owns it.
+     *
+     * @param src               source account.
+     * @param amount            amount to be withdrawn.
+     * @param suppressSuccess   print/don't print success message.
+     * @return                  true if success/false if failed.
+     */
+    public boolean withdraw(Account src, double amount, boolean suppressSuccess){
+        if (this.accounts.contains(src)){
+            return src.withdraw(amount, suppressSuccess);
+        }
+        System.out.println("This customer does not own this account!");
+        return false;
+    }
+
+    /**
+     * Deposit an amount into an account if owned by customer.
+     *
+     * @param src               source account to have a deposited amount.
+     * @param amount            amount to be deposited.
+     * @param suppressSuccess   print/don't print success message.
+     * @return                  true if success/false if failed.
+     */
+    public boolean deposit(Account src, double amount, boolean suppressSuccess){
+        if (this.accounts.contains(src)){
+            src.deposit(amount, suppressSuccess);
+            return true;
+        }
+        System.out.println("This customer does not own this account!");
+        return false;
     }
 }

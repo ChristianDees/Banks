@@ -42,7 +42,7 @@ public class CustomerInterface extends UserInterface{
                                     transaction.oneAccountTransaction(scan, customer, fh);
                                     break;
                                 case "b":
-                                    transaction.TwoAccountTransaction(scan, customer, null, false, fh);
+                                    transaction.twoAccountTransaction(scan, customer, null, false, fh);
                                     break;
                                 default:
                                     // error logging
@@ -64,6 +64,15 @@ public class CustomerInterface extends UserInterface{
         out.println("Logging out.\n");
     }
 
+    /**
+     * Give a prompt to user and match input to regex to ensure its proper format.
+     *
+     * @param scan      object scanner to allow for user input.
+     * @param prompt    string question to ask.
+     * @param regex     pattern of which the input should match.
+     * @param fh        file handler object to log to files.
+     * @return          input once in correct form.
+     */
     private String requestCustomerInfo(Scanner scan, String prompt, String regex, FileHandler fh) {
         String input;
         int attempts = 0;
@@ -81,6 +90,12 @@ public class CustomerInterface extends UserInterface{
         return null;
     }
 
+    /**
+     * Handles the asking of users each required information prompt.
+     *
+     * @param scan  scanner object to allow for user input.
+     * @param fh    file handler object to log to files when needed.
+     */
     public void handleNewCustomer(Scanner scan, FileHandler fh) {
         out.println("Please fill out the following information:");
         String[][] prompts = {
@@ -98,20 +113,18 @@ public class CustomerInterface extends UserInterface{
             userInputs[i] = requestCustomerInfo(scan, prompts[i][0], prompts[i][1], fh);
             if (userInputs[i] == null) return; // exit if invalid
         }
-        String formattedAddress = String.format("%s, %s, %s %s",
-                capitalizeFirst(userInputs[3]), // address
-                capitalizeFirst(userInputs[4]), // city
-                userInputs[5].toUpperCase(), // state
-                userInputs[6] // zip
-        );
         // if everything checks out THEN add a new id
-        Dictionary<String, String> record = getStringStringDictionary(userInputs, formattedAddress);
-        boolean rc = addCustomer(record, defaultHeaders);
+        Dictionary<String, String> record = getStringStringDictionary(userInputs);
+        boolean rc = addCustomer(record);
         if (rc) out.println("\n* * * Successfully added new customer. * * *\n");
         else out.println("\n* * * Failed to add new customer. * * *\n");
     }
 
-    private static Dictionary<String, String> getStringStringDictionary(String[] userInputs, String formattedAddress) {
+    /**
+     * @param userInputs list of all user inputs to the expected prompts.
+     * @return           dictionary of header mapped to input values.
+     */
+    private Dictionary<String, String> getStringStringDictionary(String[] userInputs) {
         int idNum = customerIDs.last() + 1;
         int checkingAccNum = checkingAccNums.last() + 1;
         int checkingCurrBalance = 0;
@@ -121,6 +134,12 @@ public class CustomerInterface extends UserInterface{
         int creditAccBalance = 0;
         int creditMax = 0; // CHANGE THIS
         // add customer data to dictionary
+        String formattedAddress = String.format("%s, %s, %s %s",
+                capitalizeFirst(userInputs[3]), // address
+                capitalizeFirst(userInputs[4]), // city
+                userInputs[5].toUpperCase(),    // state
+                userInputs[6]                   // zip
+        );
         Dictionary<String, String> record = new Hashtable<>();
         record.put("ID", String.valueOf(idNum));
         record.put("First Name", userInputs[0]);
@@ -138,45 +157,18 @@ public class CustomerInterface extends UserInterface{
         return record;
     }
 
+    /**
+     * Capitalizes the month within the format (day-month-year)
+     *
+     * @param date  string in the format (dd-month-yy).
+     * @return      formatted string.
+     */
     private static String capitalizeMonth(String date) {
         String[] parts = date.split("-");
         if (parts.length > 1) {
             parts[1] = parts[1].substring(0, 1).toUpperCase() + parts[1].substring(1);
         }
         return String.join("-", parts);
-    }
-
-    boolean addCustomer(Dictionary<String, String> record, String[] headers) {
-        int idNum = Integer.parseInt(record.get(headers[0]));
-        String firstName = record.get(headers[1]).toLowerCase();
-        String lastName = record.get(headers[2]).toLowerCase();
-        String dob = record.get(headers[3]);
-        String address = record.get(headers[4]).replace("\"", "");
-        String phoneNum = record.get(headers[5]).replaceAll("[()\\s-]", "");
-        int checkingAccNum = Integer.parseInt(record.get(headers[6]));
-        double checkingStartBalance = Double.parseDouble(record.get(headers[7]));
-        int savingsAccNum = Integer.parseInt(record.get(headers[8]));
-        double savingsStartBalance = Double.parseDouble(record.get(headers[9]));
-        int creditAccNum = Integer.parseInt(record.get(headers[10]));
-        int creditMax = Integer.parseInt(record.get(headers[11]));
-        double creditStartBalance = Double.parseDouble(record.get(headers[12]));
-
-        // add customer and its accounts
-        boolean rc = customerIDs.add(idNum);
-        FileHandler fh = new FileHandler();
-        if(!rc){
-            fh.appendLog("EPMB_Error_Log", "Failed to add user with id: " + idNum + ". Reason: User with that id already exists.");
-        } else {
-            Customer newCustomer = new Customer(idNum, firstName, lastName, dob, address, phoneNum);
-            Checking checkingAcc = new Checking(checkingAccNum, checkingStartBalance);
-            Savings savingsAcc = new Savings(savingsAccNum, savingsStartBalance);
-            Credit creditAcc = new Credit(creditAccNum, creditStartBalance, creditMax);
-            if (fh.addAccountToMaps(checkingAcc)) newCustomer.addAccount(checkingAcc);
-            if (fh.addAccountToMaps(savingsAcc)) newCustomer.addAccount(savingsAcc);
-            if (fh.addAccountToMaps(creditAcc)) newCustomer.addAccount(creditAcc);
-            customers.put(idNum+firstName+lastName, newCustomer);
-        }
-        return rc;
     }
 
 }

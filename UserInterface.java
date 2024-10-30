@@ -36,6 +36,7 @@ public abstract class UserInterface extends BankRegistry {
     }
 
     /**
+     * Determine if user requests to leave the program.
      *
      * @return if the user requests to exit or logout
      */
@@ -84,6 +85,5 @@ public abstract class UserInterface extends BankRegistry {
         }
         return null;
     }
-
 }
 

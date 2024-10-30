@@ -23,7 +23,7 @@ public class ManagerInterface extends UserInterface{
         while(attempts < 3){
             if (this.leave()) return;
             // provide options
-            out.print("A. Inquire accounts by customer name and id.\nB. Inquire account by type/number.\n> ");
+            out.print("A. Inquire accounts by customer name.\nB. Inquire account by type/number.\nC. Perform transaction from file.\n> ");
             String input = scan.nextLine().trim().toLowerCase();
             if (logout(input)) return;
             switch (input) {
@@ -32,6 +32,12 @@ public class ManagerInterface extends UserInterface{
                     break;
                 case "b":
                     inquireByAccount(scan, fh);
+                    break;
+                case "c":
+                    Manager manager = new Manager("fake", "fake");
+                    System.out.print("Enter the filename:\n> ");
+                    String filename = scan.nextLine().trim().toLowerCase();
+                    manager.transactFromFile(filename);
                     break;
                 default:
                     // error logging
@@ -115,4 +121,6 @@ public class ManagerInterface extends UserInterface{
             }
         }
     }
+
+
 }

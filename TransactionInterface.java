@@ -33,10 +33,11 @@ public class TransactionInterface extends UserInterface {
             double depositAmount = this.validateMoney(depositAmountStr);
             // if successful
             if (depositAmount >= 0) {
-                account.deposit(depositAmount, false);
+                boolean rc = customer.deposit(account, depositAmount, false);
                 account.printAccount(true, true);
-                fh.appendLog("EPMB_Transactions", customer.getFullName() + " [ID:" + customer.getId() + "] made a deposit of $" + String.format("%.2f", depositAmount) +
+                if (rc) fh.appendLog("EPMB_Transactions", customer.getFullName() + " [ID:" + customer.getId() + "] made a deposit of $" + String.format("%.2f", depositAmount) +
                         " to " + account.getType() + " account [Account Number: " + account.getAccountNumber() + "]. Current balance: $" + String.format("%.2f", account.getBalance()));
+                else fh.appendLog("EPMB_Error_Log", "Reason for failure: Customer does not own this account or insufficient funds.");
                 return;
             } else {
                 // error logging
@@ -115,7 +116,7 @@ public class TransactionInterface extends UserInterface {
                     withdrawAmount(scan, customer, account, fh);
                     return;
                 case "d":
-                    TwoAccountTransaction(scan, customer, account, true, fh);
+                    twoAccountTransaction(scan, customer, account, true, fh);
                     return;
                 default:
                     // error logging
@@ -134,7 +135,7 @@ public class TransactionInterface extends UserInterface {
      * @param transfer    the transfer
      * @param fh          the fh
      */
-    public void TwoAccountTransaction(Scanner scan, Customer customerOne, Account accountOne, boolean transfer, FileHandler fh) {
+    public void twoAccountTransaction(Scanner scan, Customer customerOne, Account accountOne, boolean transfer, FileHandler fh) {
         boolean send = !transfer;
         MainInterface ih = new MainInterface();
         if (send) customerOne.viewAccounts(false);
@@ -319,5 +320,4 @@ public class TransactionInterface extends UserInterface {
         }
         return null;
     }
-
 }
