@@ -12,7 +12,7 @@ import java.util.Hashtable;
 import java.util.TreeSet;
 
 public abstract class BankRegistry {
-    public static Dictionary<String, Customer> customers = new Hashtable<>();
+    public static  Dictionary<String, Customer> customers = new Hashtable<>();
     public static  Dictionary<Integer, Checking> checkingAccounts = new Hashtable<>();
     public static  Dictionary<Integer, Savings> savingAccounts = new Hashtable<>();
     public static final Dictionary<Integer, Credit> creditAccounts = new Hashtable<>();

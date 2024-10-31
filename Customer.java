@@ -12,12 +12,15 @@ import java.util.ArrayList;
 /**
  * Represents a customer with their accounts, dob, address, phone number, and unique id number
  */
-public class Customer extends Person{
-    ArrayList<Account> accounts = new ArrayList<>();
+public class Customer implements Person{
+    int idNum;
+    String firstName;
+    String lastName;
     String dob;
     String address;
     String phoneNum;
-    int idNum;
+    ArrayList<Account> accounts = new ArrayList<>();
+
 
     /**
      * Constructs a new Customer with the specified attributes.
@@ -30,7 +33,8 @@ public class Customer extends Person{
      * @param phoneNum      The customer's phone number.
      */
     Customer(int idNum, String firstName, String lastName, String dob, String address, String phoneNum){
-        super(firstName, lastName);
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.idNum = idNum;
         this.dob = dob;
         this.address = address;
@@ -145,7 +149,7 @@ public class Customer extends Person{
      * **/
     public boolean transfer(Account src, Account dst, double amount){
         boolean rc = false;
-        if (this.accounts.contains(src) && this.accounts.contains(dst)){
+        if (this.accounts.contains(src) && this.accounts.contains(dst) && !src.equals(dst)){
             rc = src.withdraw(amount, true);
             if (rc){
                 dst.deposit(amount, true);
@@ -168,7 +172,8 @@ public class Customer extends Person{
      * @return          The successfulness of money being sent.
      * **/
     public boolean send(Account src, Account dst, double amount) {
-        boolean rc = src.withdraw(amount, true);
+        boolean rc = false;
+        if (this.accounts.contains(src) && !this.accounts.contains(dst)) rc = src.withdraw(amount, true);
         if (rc) {
             dst.deposit(amount, true);
             System.out.println("\n*  *  *  *  *  *  *    Send Successful    *  *  *  *  *  *  *");
@@ -210,5 +215,10 @@ public class Customer extends Person{
         }
         System.out.println("This customer does not own this account!");
         return false;
+    }
+
+    @Override
+    public String getFullName() {
+        return this.getFirstName() + " " + this.getLastName();
     }
 }

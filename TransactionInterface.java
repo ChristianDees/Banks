@@ -191,7 +191,8 @@ public class TransactionInterface extends UserInterface {
                     return;
                 } else {
                     // error logging
-                    fh.appendLog("EPMB_Error_Log", logMessage + " Reason for failure: Insufficient funds.");
+                    fh.appendLog("EPMB_Error_Log", logMessage + " Reason for failure: Insufficient funds or incorrect account.");
+                    return;
                 }
             } else {
                 // error logging
@@ -232,7 +233,8 @@ public class TransactionInterface extends UserInterface {
                     return;
                 } else {
                     // error logging
-                    fh.appendLog("EPMB_Error_Log", logMessage + " Reason for failure: Insufficient funds.");
+                    fh.appendLog("EPMB_Error_Log", logMessage + " Reason for failure: Insufficient funds or incorrect accounts.");
+                    return;
                 }
             } else {
                 // error logging

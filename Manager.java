@@ -1,7 +1,10 @@
 import java.util.ArrayList;
 import java.util.Dictionary;
 
-public class Manager extends Person{
+public class Manager implements Person{
+
+    String firstName;
+    String lastName;
 
     /**
      * Constructs a new Person with the specified attributes.
@@ -10,7 +13,8 @@ public class Manager extends Person{
      * @param lastName  The last name of the person.
      */
     Manager(String firstName, String lastName) {
-        super(firstName, lastName);
+        this.firstName = firstName;
+        this.lastName = lastName;
     }
 
     /**
@@ -82,5 +86,10 @@ public class Manager extends Person{
                 System.out.println("Customer from does not exist.");
             }
         }
+    }
+
+    @Override
+    public String getFullName() {
+        return this.firstName + " " + this.lastName;
     }
 }
