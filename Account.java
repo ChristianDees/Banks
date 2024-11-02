@@ -8,6 +8,8 @@
 // Honesty Statement: We affirm that we have completed this assignment entirely on our own, without any assistance from outside sources, including peers, experts, online resources, or other means. All code and ideas were that of our own work, and we have followed proper academic integrity.
  */
 import java.text.NumberFormat;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * Represents an Account with its unique account number and current balance
@@ -33,7 +35,9 @@ public abstract class Account {
      * @return  The current balance of the account.
      * **/
     public double getBalance() {
-        return this.balance;
+        BigDecimal bd = BigDecimal.valueOf(this.balance);
+        bd = bd.setScale(2, RoundingMode.HALF_UP);
+        return bd.doubleValue();
     }
 
     /**
@@ -57,8 +61,9 @@ public abstract class Account {
     /**
      * Add money to an account.
      **/
-    public void deposit(double amount){
+    public boolean deposit(double amount){
         this.balance += amount;
+        return true;
     }
 
     /**
@@ -71,6 +76,7 @@ public abstract class Account {
             this.balance -= amount;
             return true;
         }
+        System.out.println("\nWarning: Insufficient funds.");
         return false;
     }
 

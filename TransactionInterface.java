@@ -143,7 +143,7 @@ public class TransactionInterface extends UserInterface {
             if (accountOne == null) return;
         }
         Account accountTwo;
-        Customer customerTwo;
+        Customer customerTwo = null;
         if (send) {
             // get second account
             System.out.println("Please enter the following for the receiving account:\n" + "-".repeat(51));
@@ -158,8 +158,9 @@ public class TransactionInterface extends UserInterface {
         if (transfer) {
             this.transferAmount(scan, customerOne, accountOne, accountTwo, fh);
         } else {
-            this.sendAmount(scan, customerOne, accountOne, accountTwo, fh);
-        }    }
+            this.sendAmount(scan, customerOne, accountOne, customerTwo, accountTwo, fh);
+        }
+        }
 
     /**
      * Send money from one account to another account of the same owner.
@@ -186,12 +187,11 @@ public class TransactionInterface extends UserInterface {
                         " Account Two Current Balance: $" + String.format("%.2f", accountTwo.getBalance());
                 if (rc) {
                     fh.appendLog("EPMB_Transactions", logMessage);
-                    return;
                 } else {
                     // error logging
                     fh.appendLog("EPMB_Error_Log", logMessage + " Reason for failure: Insufficient funds or incorrect account.");
-                    return;
                 }
+                return;
             } else {
                 // error logging
                 fh.appendLog("EPMB_Error_Log", customer.getFullName() + " [ID:" + customer.getId() + "] attempted a transfer of $" + transferAmountStr + " from " +
@@ -213,7 +213,7 @@ public class TransactionInterface extends UserInterface {
      * @param accountTwo    Destination account for the transaction.
      * @param fh            File handler for logging.
      */
-    private void sendAmount(Scanner scan, Customer customerOne, Account accountOne, Account accountTwo, FileHandler fh) {
+    private void sendAmount(Scanner scan, Customer customerOne, Account accountOne, Customer customerTwo, Account accountTwo, FileHandler fh) {
         // three attempts allowed
         for (int attempts = 0; attempts < 3; attempts++) {
             System.out.print("Enter amount to be sent: \n$");
@@ -221,7 +221,7 @@ public class TransactionInterface extends UserInterface {
             double sendAmount = this.validateMoney(sendAmountStr);
             // if successful
             if (sendAmount >= 0) {
-                boolean rc = customerOne.send(accountOne, accountTwo, sendAmount);
+                boolean rc = customerOne.send(accountOne, accountTwo, sendAmount, customerTwo);
                 String logMessage = customerOne.getFullName() + " [ID:" + customerOne.getId() + "] attempted to send $" + String.format("%.2f", sendAmount) +
                         " from " + accountOne.getType() + " account [Account Number:" + accountOne.getAccountNumber() +
                         "] to " + customerOne.getFullName() + " [ID:" + customerOne.getId() + "] " + accountTwo.getType() + " account [Account Number:" + accountTwo.getAccountNumber() + "]. " +
@@ -288,7 +288,7 @@ public class TransactionInterface extends UserInterface {
             if (parts.length != 2) {
                 // error logging
                 fh.appendLog("EPMB_Error_Log", customer.getFullName() + " [ID:" + customer.getId() + "] Reason for failure: Invalid format when specifying account.");
-                out.println("Invalid format.");
+                out.println("Error: Invalid format. Please try again.");
                 continue;
             }
             String accType = parts[0].trim();
@@ -305,17 +305,17 @@ public class TransactionInterface extends UserInterface {
                     }else {
                         // error logging
                         fh.appendLog("EPMB_Error_Log", customer.getFullName() + " [ID:" + customer.getId() + "] Reason for failure: Attempt to access unauthorized account.");
-                        out.println("You don't own that account! Please try again.");
+                        out.println("Error: The customer does not own this account. Please try again.");
                     }
                 } else {
                     // error logging
                     fh.appendLog("EPMB_Error_Log", customer.getFullName() + " [ID:" + customer.getId() + "] Reason for failure: Attempt to access nonexistent account.");
-                    out.println("Account not found. Please try again.");
+                    out.println("Error: Account not found. Please try again.");
                 }
             } catch (NumberFormatException e) {
                 // error logging
                 fh.appendLog("EPMB_Error_Log", customer.getFullName() + " [ID:" + customer.getId() + "] Reason for failure: Invalid format when specifying account number.");
-                out.println("Invalid account number. Please try again.");
+                out.println("Error: Invalid account number. Please try again.");
             }
         }
         return null;

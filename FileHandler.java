@@ -24,7 +24,7 @@ public class FileHandler extends BankRegistry{
      *
      * @param filename the filename.
      */
-    public void loadFromCSV(String filename) {
+    public void getCustomersFromCSV(String filename) {
         ArrayList<Dictionary<String, String>> allRecords = getAllRecordsFromCSV(filename);
         for (Dictionary<String, String> recordDict : allRecords){
             if (!addCustomer(recordDict)) System.out.println("Failed to add customer.");
@@ -67,21 +67,13 @@ public class FileHandler extends BankRegistry{
      * @param filename the filename to exported to.
      */
     public void exportCustomerReportToCSV(String filename) {
-        filename += ".csv";
+        filename = "BankReports/"+filename+".csv";
         // write to file
         try (FileWriter writer = new FileWriter(filename, false)) {
-            // format phone number (area code) 3digits-4digits
-            Function<String, String> formatPhoneNumber = phoneNumber -> String.format("(%s) %s-%s", phoneNumber.substring(0, 3), phoneNumber.substring(3, 6), phoneNumber.substring(6));
             // add quotes if string has commas
             Function<String, String> escapeValue = value -> {
                 if (value.contains(","))return "\"" + value.replace("\"", "\"\"") + "\"";
                 return value;
-            };
-            // capitalize month in dob format
-            Function<String, String> capitalizeMonth = date -> {
-                String[] parts = date.split("-");
-                if (parts.length > 1)parts[1] = parts[1].substring(0, 1).toUpperCase() + parts[1].substring(1);
-                return String.join("-", parts);
             };
             // capitalize each word in a string
             Function<String, String> capitalizeWords = input -> Arrays.stream(input.split("\\s+")).map(word -> Character.toTitleCase(word.charAt(0)) + word.substring(1)).collect(Collectors.joining(" "));
@@ -94,9 +86,9 @@ public class FileHandler extends BankRegistry{
                 customerData[0] = String.valueOf(customer.getId());
                 customerData[1] = capitalizeWords.apply(customer.getFirstName());
                 customerData[2] = capitalizeWords.apply(customer.getLastName());
-                customerData[3] = capitalizeMonth.apply((customer.getDob()));
+                customerData[3] = customer.getDob();
                 customerData[4] = capitalizeWords.apply(escapeValue.apply(customer.getAddress()));
-                customerData[5] = formatPhoneNumber.apply(customer.getPhoneNum());
+                customerData[5] = customer.getPhoneNum();
                 String checkingAccountNumber = "", checkingBalance = "";
                 String savingsAccountNumber = "", savingsBalance = "";
                 String creditAccountNumber = "", creditBalance = "", creditMaxValue = "";
@@ -195,4 +187,29 @@ public class FileHandler extends BankRegistry{
         }
         return headers;
     }
+
+    /**
+     * Append message to a log (txt).
+     *
+     * @param filename the filename.
+     */
+    public void appendStatement(String filename, String msg) {
+        File file = new File(filename + ".csv");
+        boolean fileExists = file.exists();
+        try (FileWriter myWriter = new FileWriter(file, true)) {
+            if (!fileExists) {
+                myWriter.write("Customer, Address, Phone" + System.lineSeparator());
+                myWriter.write(msg+ System.lineSeparator());
+                String headers = "Date, Action, From, FromID, To, ToID, Amount, Balance";
+                myWriter.write(headers + System.lineSeparator());
+            } else {
+                myWriter.write(msg + System.lineSeparator());
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while writing to the log file: " + e.getMessage());
+        }
+    }
+
 }
+
+

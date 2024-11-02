@@ -2,4 +2,8 @@
 out/
 *.txt
 *.csv
+BankReports/*
+BankStatements/*
+Transactions/*
+
 

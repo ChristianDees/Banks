@@ -7,6 +7,8 @@
 // Lab Description: This lab is meant to demonstrate our knowledge in object-oriented concepts such as inheritance, polymorphism, UML diagrams, and more through coding our own implementation of a bank system of which deposits, withdraws, transfer, and pays. This lab also included concepts of logging, testing, debugging, file reading, and JavaDoc.
 // Honesty Statement: We affirm that we have completed this assignment entirely on our own, without any assistance from outside sources, including peers, experts, online resources, or other means. All code and ideas were that of our own work, and we have followed proper academic integrity.
  */
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -76,7 +78,9 @@ public class Customer implements Person{
      * @return the string
      */
     public String getDob(){
-        return this.dob;
+        String[] parts = this.dob.split("-");
+        if (parts.length > 1)parts[1] = parts[1].substring(0, 1).toUpperCase() + parts[1].substring(1);
+        return String.join("-", parts);
     }
 
     /**
@@ -94,7 +98,7 @@ public class Customer implements Person{
      * @return the string
      */
     public String getPhoneNum(){
-        return this.phoneNum;
+        return String.format("(%s) %s-%s", this.phoneNum.substring(0, 3), this.phoneNum.substring(3, 6), this.phoneNum.substring(6));
     }
 
     /**
@@ -158,21 +162,25 @@ public class Customer implements Person{
      *
      * @return          The successfulness of money being transferred.
      * **/
-    public boolean transfer(Account src, Account dst, double amount){
-        boolean rc = false;
-        if (this.accounts.contains(src) && this.accounts.contains(dst) && !src.equals(dst)){
-            rc = src.withdraw(amount);
-            if (rc){
-                dst.deposit(amount);
-                this.addTransaction("Transfer of funds");
-                System.out.println("\n*  *  *  *  *  *  *  Transfer Successful  *  *  *  *  *  *  *");
-            }
+    public boolean transfer(Account src, Account dst, double amount) {
+        if (!this.accounts.contains(src) || !this.accounts.contains(dst) || src.equals(dst)) {
+            System.out.println("\nWarning: The customer must own both accounts to transfer funds between them and the accounts cannot be the same.");
+            return false;
         }
-        if (!rc) System.out.println("*  *  *  *  *  *  *    Transfer Failed    *  *  *  *  *  *  *");
+        boolean rc = src.withdraw(amount) && dst.deposit(amount);
+        String transactionMessage = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) +
+                "," + "TRANSFER" + ","  + src.getType() + "," + src.getAccountNumber() + "," +
+                dst.getType() + "," + dst.getAccountNumber() + "," +
+                String.format("%.2f", amount) + "," + dst.getBalance();
+        if (rc) {
+            this.addTransaction(transactionMessage);
+            System.out.println("\n*  *  *  *  *  *  *  Transfer Successful  *  *  *  *  *  *  *");
+        } else System.out.println("\n*  *  *  *  *  *  *    Transfer Failed    *  *  *  *  *  *  *");
         src.printAccount(true, true);
         dst.printAccount(true, false);
         return rc;
     }
+
 
     /**
      * Sends money from one customer's account to another customer's account.
@@ -183,17 +191,30 @@ public class Customer implements Person{
      *
      * @return          The successfulness of money being sent.
      * **/
-    public boolean send(Account src, Account dst, double amount) {
-        boolean rc = false;
-        if (this.accounts.contains(src) && !this.accounts.contains(dst)) rc = src.withdraw(amount);
+    public boolean send(Account src, Account dst, double amount, Customer toCustomer) {
+        if (this.accounts.contains(src) && this.accounts.contains(dst)) {
+            System.out.println("\nWarning: Customers cannot send funds to themselves; please use the transfer option instead.");
+            return false;
+        }
+        boolean rc = src.withdraw(amount) && dst.deposit(amount);
+        String transactionMessage = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) +
+                "," + "SEND" + ","  + src.getType() + "," + src.getAccountNumber() + "," +
+                toCustomer.getFullName() + "," + toCustomer.getId() + "," +
+                String.format("%.2f", amount) + "," + src.getBalance();
+        String depositMessage = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) +
+                "," + "RECEIVE" + "," + this.getFullName() + "," + this.getId() + "," +
+                dst.getType() + "," + dst.getAccountNumber() + "," +
+                String.format("%.2f", amount) + "," + dst.getBalance();
         if (rc) {
-            dst.deposit(amount);
-            this.addTransaction("Sent funds");
+            toCustomer.addTransaction(depositMessage);
+            this.addTransaction(transactionMessage);
             System.out.println("\n*  *  *  *  *  *  *    Send Successful    *  *  *  *  *  *  *");
         } else System.out.println("*  *  *  *  *  *  *      Send Failed      *  *  *  *  *  *  *");
         src.printAccount(true, true);
+        dst.printAccount(false, false);
         return rc;
     }
+
 
     /**
      * Withdraw an amount from an account, if customer owns it.
@@ -202,16 +223,21 @@ public class Customer implements Person{
      * @param amount            amount to be withdrawn.
      * @return                  true if success/false if failed.
      */
-    public boolean withdraw(Account src, double amount){
-        boolean rc = false;
-        if (this.accounts.contains(src)){
-            rc = src.withdraw(amount);
-            if (rc){
-                this.addTransaction("Withdrew funds");
-                System.out.println("\n*  *  *  *  *  *  *  Withdraw Successful  *  *  *  *  *  *  *");
-                src.printAccount(true, true);
-            } else System.out.println("\n*  *  *  *  *  *  * *  Withdraw Failed  *  *  *  *  *  *  *  *");
+    public boolean withdraw(Account src, double amount) {
+        if (!this.accounts.contains(src)) {
+            System.out.println("\nWarning: This account does not belong to this customer.");
+            return false;
         }
+        boolean rc = src.withdraw(amount);
+        if (rc) {
+            String transactionMessage = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) +
+                    "," + "WITHDRAWAL" + ","  + src.getType() + "," + src.getAccountNumber() + "," +
+                    " " + "," + " " + "," +
+                    String.format("%.2f", amount) + "," + src.getBalance();
+            this.addTransaction(transactionMessage);
+            System.out.println("\n*  *  *  *  *  *  *  Withdraw Successful  *  *  *  *  *  *  *");
+        } else System.out.println("\n*  *  *  *  *  *  *    Withdraw Failed    *  *  *  *  *  *  *");
+        src.printAccount(true, true);
         return rc;
     }
 
@@ -222,15 +248,23 @@ public class Customer implements Person{
      * @param amount            amount to be deposited.
      * @return                  true if success/false if failed.
      */
-    public boolean deposit(Account src, double amount){
-        boolean rc = false;
-        if (this.accounts.contains(src)){
-            src.deposit(amount);
-            src.printAccount(true, true);
-            this.addTransaction("Deposited funds");
+    public boolean deposit(Account src, double amount) {
+        if (!this.accounts.contains(src)) {
+            System.out.println("\nWarning: Deposits are only permitted into accounts owned by the customer.");
+            return false;
+        }
+        boolean rc = src.deposit(amount);
+        if (rc) {
+            String transactionMessage = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) +
+                    "," + "DEPOSIT" + ","  + " " + "," + " " + "," +
+                    src.getType() + "," + src.getAccountNumber() + "," +
+                    String.format("%.2f", amount) + "," + src.getBalance();
+            this.addTransaction(transactionMessage);
             System.out.println("\n*  *  *  *  *  *  *  Deposit Successful   *  *  *  *  *  *  *");
-            rc = true;
-        } else  System.out.println("\n*  *  *  *  *  *  *  *  Deposit Failed  *  *  *  *  *  *  *  *");
+        } else {
+            System.out.println("\n*  *  *  *  *  *  *    Deposit Failed    *  *  *  *  *  *  *");
+        }
+        src.printAccount(true, true);
         return rc;
     }
 

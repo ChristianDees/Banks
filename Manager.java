@@ -27,7 +27,7 @@ public class Manager implements Person{
      */
     public void transactFromFile(String filename) {
         FileHandler fh = new FileHandler();
-        ArrayList<Dictionary<String, String>> allRecords = fh.getAllRecordsFromCSV(filename);
+        ArrayList<Dictionary<String, String>> allRecords = fh.getAllRecordsFromCSV("Transactions/"+filename);
 
         for (Dictionary<String, String> recordDict : allRecords) {
             String fromCustomerName = (recordDict.get("From First Name") + recordDict.get("From Last Name")).toLowerCase();
@@ -62,7 +62,7 @@ public class Manager implements Person{
 
                     switch (action) {
                         case "pays":
-                            rc = fromCustomer.send(fromAccount, toAccount, amount);
+                            rc = fromCustomer.send(fromAccount, toAccount, amount, toCustomer);
                             break;
                         case "transfers":
                             rc = fromCustomer.transfer(fromAccount, toAccount, amount);
@@ -92,15 +92,17 @@ public class Manager implements Person{
     }
 
     public void generateBankStatement(Customer customer){
+        if (customer==null)return;
         LinkedList<String> transactions = customer.getTransactions();
         String name = customer.getFullName();
         String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        String filename = name.replace(" ", "")+"Statement"+date;
+        String filename = "BankStatements/"+name.replace(" ", "")+"Statement"+date;
 
         FileHandler fh = new FileHandler();
         if (!transactions.isEmpty()) {
+            fh.appendStatement(filename, customer.getFullName() + "," + "\""+customer.getAddress()+"\""+ "," + customer.getPhoneNum());
             for (String transaction : transactions) {
-                fh.appendLog(filename, transaction);
+                fh.appendStatement(filename, transaction);
             }
             System.out.println("\n*  *  *  *  Successfully exported " + name + "'s bank statement to "+ filename +"  *  *  *  *\n");
         } else System.out.println("\n*  *  *  *  Unable to export " + name + "'s bank statement. There are no transactions to export.  *  *  *  *\n");

@@ -34,10 +34,23 @@ public class Credit extends Account{
      * **/
     public boolean withdraw(double amount){
         double totalCharge = (amount + (0.025*amount)); // AVERAGE TRANSACTION FEE
-       if ((amount > 0) && ((this.balance - totalCharge) >= (-1*this.creditMax))) {
+        if ((amount > 0) && ((this.balance - totalCharge) >= (-1*this.creditMax))) {
             this.balance -= totalCharge;
             return true;
         }
+        System.out.println("\nWarning: Invalid amount.");
+        return false;
+    }
+
+    /**
+     * Add money to an account.
+     **/
+    public boolean deposit(double amount){
+        if (amount + this.balance <= 0){
+            this.balance += amount;
+            return true;
+        }
+        else System.out.println("\nWarning: Credit deposits cannot exceed the outstanding balance.");
         return false;
     }
 
