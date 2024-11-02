@@ -1,5 +1,8 @@
 import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.LinkedList;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class Manager implements Person{
 
@@ -68,10 +71,10 @@ public class Manager implements Person{
                             fromCustomer.viewAccount(fromAccount, true);
                             break;
                         case "withdraws":
-                            rc = fromCustomer.withdraw(fromAccount, amount, false);
+                            rc = fromCustomer.withdraw(fromAccount, amount);
                             break;
                         case "deposits":
-                            rc = fromCustomer.deposit(toAccount, amount, false);
+                            rc = fromCustomer.deposit(toAccount, amount);
                             break;
                         default:
                             System.out.println("Invalid action: " + action);
@@ -86,6 +89,21 @@ public class Manager implements Person{
                 System.out.println("Customer from does not exist.");
             }
         }
+    }
+
+    public void generateBankStatement(Customer customer){
+        LinkedList<String> transactions = customer.getTransactions();
+        String name = customer.getFullName();
+        String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String filename = name.replace(" ", "")+"Statement"+date;
+
+        FileHandler fh = new FileHandler();
+        if (!transactions.isEmpty()) {
+            for (String transaction : transactions) {
+                fh.appendLog(filename, transaction);
+            }
+            System.out.println("\n*  *  *  *  Successfully exported " + name + "'s bank statement to "+ filename +"  *  *  *  *\n");
+        } else System.out.println("\n*  *  *  *  Unable to export " + name + "'s bank statement. There are no transactions to export.  *  *  *  *\n");
     }
 
     @Override

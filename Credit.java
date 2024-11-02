@@ -12,7 +12,7 @@
  */
 
 public class Credit extends Account{
-    int creditMax;
+    double creditMax;
 
     /**
      * Constructs a new Credit Account with the specified attributes.
@@ -30,17 +30,14 @@ public class Credit extends Account{
      * Takes a specified amount out from one customer's account.
      *
      * @param amount            The total amount to be withdrawn from the account.
-     * @param suppressSuccess   Flag to not print the success of the withdrawal or not.
      *
      * **/
-    public boolean withdraw(double amount, boolean suppressSuccess){
+    public boolean withdraw(double amount){
         double totalCharge = (amount + (0.025*amount)); // AVERAGE TRANSACTION FEE
-        if ((amount > 0) && ((this.balance - totalCharge) <= this.creditMax)) {
+       if ((amount > 0) && ((this.balance - totalCharge) >= (-1*this.creditMax))) {
             this.balance -= totalCharge;
-            if (!suppressSuccess) System.out.println("*  *  *  *  *  *  *  Withdraw Successful  *  *  *  *  *  *  *\n");
             return true;
         }
-        System.out.println("*  *  *  *  *  *  *  Insufficient Funds   *  *  *  *  *  *  *\n");
         return false;
     }
 
@@ -49,7 +46,7 @@ public class Credit extends Account{
      *
      * @return an accounts maximum credit limit
      */
-    public int getCreditMax(){
+    public double getCreditMax(){
         return this.creditMax;
     }
 }

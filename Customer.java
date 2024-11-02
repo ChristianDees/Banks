@@ -8,6 +8,7 @@
 // Honesty Statement: We affirm that we have completed this assignment entirely on our own, without any assistance from outside sources, including peers, experts, online resources, or other means. All code and ideas were that of our own work, and we have followed proper academic integrity.
  */
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
  * Represents a customer with their accounts, dob, address, phone number, and unique id number
@@ -20,6 +21,7 @@ public class Customer implements Person{
     String address;
     String phoneNum;
     ArrayList<Account> accounts = new ArrayList<>();
+    LinkedList<String> transactions = new LinkedList<String>();
 
 
     /**
@@ -105,6 +107,15 @@ public class Customer implements Person{
     }
 
     /**
+     * Get customer's transactions
+     *
+     * @return customer's transactions
+     */
+    public LinkedList<String> getTransactions(){
+        return this.transactions;
+    }
+
+    /**
      * Prints an account's information if it exists.
      *
      * @param viewBalance   Print the balance if true, don't if false.
@@ -150,9 +161,10 @@ public class Customer implements Person{
     public boolean transfer(Account src, Account dst, double amount){
         boolean rc = false;
         if (this.accounts.contains(src) && this.accounts.contains(dst) && !src.equals(dst)){
-            rc = src.withdraw(amount, true);
+            rc = src.withdraw(amount);
             if (rc){
-                dst.deposit(amount, true);
+                dst.deposit(amount);
+                this.addTransaction("Transfer of funds");
                 System.out.println("\n*  *  *  *  *  *  *  Transfer Successful  *  *  *  *  *  *  *");
             }
         }
@@ -173,13 +185,12 @@ public class Customer implements Person{
      * **/
     public boolean send(Account src, Account dst, double amount) {
         boolean rc = false;
-        if (this.accounts.contains(src) && !this.accounts.contains(dst)) rc = src.withdraw(amount, true);
+        if (this.accounts.contains(src) && !this.accounts.contains(dst)) rc = src.withdraw(amount);
         if (rc) {
-            dst.deposit(amount, true);
+            dst.deposit(amount);
+            this.addTransaction("Sent funds");
             System.out.println("\n*  *  *  *  *  *  *    Send Successful    *  *  *  *  *  *  *");
-        } else {
-            System.out.println("*  *  *  *  *  *  *      Send Failed      *  *  *  *  *  *  *");
-        }
+        } else System.out.println("*  *  *  *  *  *  *      Send Failed      *  *  *  *  *  *  *");
         src.printAccount(true, true);
         return rc;
     }
@@ -189,15 +200,19 @@ public class Customer implements Person{
      *
      * @param src               source account.
      * @param amount            amount to be withdrawn.
-     * @param suppressSuccess   print/don't print success message.
      * @return                  true if success/false if failed.
      */
-    public boolean withdraw(Account src, double amount, boolean suppressSuccess){
+    public boolean withdraw(Account src, double amount){
+        boolean rc = false;
         if (this.accounts.contains(src)){
-            return src.withdraw(amount, suppressSuccess);
+            rc = src.withdraw(amount);
+            if (rc){
+                this.addTransaction("Withdrew funds");
+                System.out.println("\n*  *  *  *  *  *  *  Withdraw Successful  *  *  *  *  *  *  *");
+                src.printAccount(true, true);
+            } else System.out.println("\n*  *  *  *  *  *  * *  Withdraw Failed  *  *  *  *  *  *  *  *");
         }
-        System.out.println("This customer does not own this account!");
-        return false;
+        return rc;
     }
 
     /**
@@ -205,20 +220,35 @@ public class Customer implements Person{
      *
      * @param src               source account to have a deposited amount.
      * @param amount            amount to be deposited.
-     * @param suppressSuccess   print/don't print success message.
      * @return                  true if success/false if failed.
      */
-    public boolean deposit(Account src, double amount, boolean suppressSuccess){
+    public boolean deposit(Account src, double amount){
+        boolean rc = false;
         if (this.accounts.contains(src)){
-            src.deposit(amount, suppressSuccess);
-            return true;
-        }
-        System.out.println("This customer does not own this account!");
-        return false;
+            src.deposit(amount);
+            src.printAccount(true, true);
+            this.addTransaction("Deposited funds");
+            System.out.println("\n*  *  *  *  *  *  *  Deposit Successful   *  *  *  *  *  *  *");
+            rc = true;
+        } else  System.out.println("\n*  *  *  *  *  *  *  *  Deposit Failed  *  *  *  *  *  *  *  *");
+        return rc;
+    }
+
+    /**
+     * Adds a transaction string to transaction LL.
+     *
+     * @param transaction string that describes the transaction.
+     */
+    private void addTransaction(String transaction){
+        this.transactions.add(transaction);
     }
 
     @Override
     public String getFullName() {
-        return this.getFirstName() + " " + this.getLastName();
+        String firstName = this.getFirstName();
+        String lastName = this.getLastName();
+        return (firstName.isEmpty() ? firstName : Character.toUpperCase(firstName.charAt(0)) + firstName.substring(1).toLowerCase()) +
+                " " +
+                (lastName.isEmpty() ? lastName : Character.toUpperCase(lastName.charAt(0)) + lastName.substring(1).toLowerCase());
     }
 }

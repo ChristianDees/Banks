@@ -33,8 +33,7 @@ public class TransactionInterface extends UserInterface {
             double depositAmount = this.validateMoney(depositAmountStr);
             // if successful
             if (depositAmount >= 0) {
-                boolean rc = customer.deposit(account, depositAmount, false);
-                account.printAccount(true, true);
+                boolean rc = customer.deposit(account, depositAmount);
                 if (rc) fh.appendLog("EPMB_Transactions", customer.getFullName() + " [ID:" + customer.getId() + "] made a deposit of $" + String.format("%.2f", depositAmount) +
                         " to " + account.getType() + " account [Account Number: " + account.getAccountNumber() + "]. Current balance: $" + String.format("%.2f", account.getBalance()));
                 else fh.appendLog("EPMB_Error_Log", "Reason for failure: Customer does not own this account or insufficient funds.");
@@ -65,8 +64,7 @@ public class TransactionInterface extends UserInterface {
             double withdrawAmount = this.validateMoney(withdrawAmountStr);
             if (withdrawAmount >= 0) {
                 // withdraw amount from an account
-                boolean success = account.withdraw(withdrawAmount, false);
-                account.printAccount(true, true);
+                boolean success = customer.withdraw(account, withdrawAmount);
                 String logMessage = customer.getFullName() + " [ID:" + customer.getId() + "] attempted a withdrawal of $" + String.format("%.2f", withdrawAmount) +
                         " from " + account.getType() + " account [Account Number:" + account.getAccountNumber() + "]. Current balance: $" + String.format("%.2f", account.getBalance());
                 if (success) {
