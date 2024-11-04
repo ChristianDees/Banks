@@ -181,7 +181,6 @@ public class Customer implements Person{
         return rc;
     }
 
-
     /**
      * Sends money from one customer's account to another customer's account.
      *
@@ -214,7 +213,6 @@ public class Customer implements Person{
         dst.printAccount(false, false);
         return rc;
     }
-
 
     /**
      * Withdraw an amount from an account, if customer owns it.
