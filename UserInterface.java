@@ -10,7 +10,7 @@
 import java.util.*;
 import static java.lang.System.out;
 
-public abstract class UserInterface extends BankRegistry {
+public abstract class UserInterface {
     public static boolean logout = false;
 
     /**
@@ -71,6 +71,7 @@ public abstract class UserInterface extends BankRegistry {
             }
             String formattedName = firstName+lastName;
             if (!logout(formattedName)){
+                Dictionary<String, Customer> customers = BankDatabase.getInstance().getCustomers();
                 Customer customer = customers.get(formattedName);
                 if (customer != null){
                     if (viewAccounts)

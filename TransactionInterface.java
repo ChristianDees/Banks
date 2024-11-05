@@ -228,12 +228,11 @@ public class TransactionInterface extends UserInterface {
                         "Account One Current Balance: $" + String.format("%.2f", accountOne.getBalance());
                 if (rc) {
                     fh.appendLog("EPMB_Transactions", logMessage);
-                    return;
                 } else {
                     // error logging
                     fh.appendLog("EPMB_Error_Log", logMessage + " Reason for failure: Insufficient funds or incorrect accounts.");
-                    return;
                 }
+                return;
             } else {
                 // error logging
                 fh.appendLog("EPMB_Error_Log", customerOne.getFullName() + " [ID:" + customerOne.getId() + "] attempted to send $" + String.format("%.2f", sendAmount) +
@@ -254,9 +253,9 @@ public class TransactionInterface extends UserInterface {
      * @return The account if it exists.
      */
     public Account getAccount(String accType, int accNum) {
-        return "checking".equalsIgnoreCase(accType) ? checkingAccounts.get(accNum) :
-                "savings".equalsIgnoreCase(accType) ? savingAccounts.get(accNum) :
-                        "credit".equalsIgnoreCase(accType) ? creditAccounts.get(accNum) : null;
+        return "checking".equalsIgnoreCase(accType) ? BankDatabase.getInstance().getCheckingAccounts().get(accNum) :
+                "savings".equalsIgnoreCase(accType) ? BankDatabase.getInstance().getSavingsAccounts().get(accNum) :
+                        "credit".equalsIgnoreCase(accType) ? BankDatabase.getInstance().getCreditAccounts().get(accNum) : null;
     }
 
     /**

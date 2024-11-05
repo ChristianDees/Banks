@@ -17,7 +17,7 @@ import static java.lang.System.out;
 /**
  * Represents an object to handle file appending and creation.
  */
-public class FileHandler extends BankRegistry{
+public class FileHandler {
 
     /**
      * Load from CSV.
@@ -27,7 +27,7 @@ public class FileHandler extends BankRegistry{
     public void getCustomersFromCSV(String filename) {
         ArrayList<Dictionary<String, String>> allRecords = getAllRecordsFromCSV(filename);
         for (Dictionary<String, String> recordDict : allRecords){
-            if (!addCustomer(recordDict)) System.out.println("Failed to add customer.");
+            if (!BankDatabase.getInstance().addCustomer(recordDict)) System.out.println("Failed to add customer.");
         }
     }
 
@@ -42,17 +42,23 @@ public class FileHandler extends BankRegistry{
         String err = "Failed to add account with account number: " + accountNum + ". Reason: Account with that account number already exists.";
         switch (account) {
             case Checking ignored -> {
+                TreeSet<Integer> checkingAccNums = BankDatabase.getInstance().getCheckingAccNums();
                 rc = checkingAccNums.add(accountNum);
+                Dictionary<Integer, Checking> checkingAccounts = BankDatabase.getInstance().getCheckingAccounts();
                 if (rc) checkingAccounts.put(accountNum, (Checking) account);
                 else this.appendLog("EPMB_Error_Log", err);
             }
             case Savings ignored -> {
+                TreeSet<Integer> savingsAccNums = BankDatabase.getInstance().getSavingsAccNums();
                 rc = savingsAccNums.add(accountNum);
+                Dictionary<Integer, Savings> savingAccounts = BankDatabase.getInstance().getSavingsAccounts();
                 if (rc) savingAccounts.put(accountNum, (Savings) account);
                 else this.appendLog("EPMB_Error_Log", err);
             }
             case Credit ignored -> {
+                TreeSet<Integer> creditAccNums = BankDatabase.getInstance().getCreditAccNums();
                 rc = creditAccNums.add(accountNum);
+                Dictionary<Integer, Credit> creditAccounts = BankDatabase.getInstance().getCreditAccounts();
                 if (rc) creditAccounts.put(accountNum, (Credit) account);
                 else this.appendLog("EPMB_Error_Log", err);
             }
@@ -68,6 +74,7 @@ public class FileHandler extends BankRegistry{
      */
     public void exportCustomerReportToCSV(String filename) {
         filename = "BankReports/"+filename+".csv";
+        String[] defaultHeaders = {"Identification Number", "First Name", "Last Name", "Date of Birth", "Address", "Phone Number", "Checking Account Number", "Checking Starting Balance", "Savings Account Number", "Savings Starting Balance", "Credit Account Number", "Credit Max", "Credit Starting Balance"};
         // write to file
         try (FileWriter writer = new FileWriter(filename, false)) {
             // add quotes if string has commas
@@ -80,6 +87,7 @@ public class FileHandler extends BankRegistry{
             // write hardcoded headers
             writer.write(String.join(",", defaultHeaders) + System.lineSeparator());
             // iterate customers data to add
+            Dictionary<String, Customer> customers = BankDatabase.getInstance().getCustomers();
             for (String key : Collections.list(customers.keys())) {
                 Customer customer = customers.get(key);
                 String[] customerData = new String[defaultHeaders.length];

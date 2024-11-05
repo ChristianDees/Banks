@@ -23,8 +23,7 @@ public class Customer implements Person{
     String address;
     String phoneNum;
     ArrayList<Account> accounts = new ArrayList<>();
-    LinkedList<String> transactions = new LinkedList<String>();
-
+    LinkedList<String> transactions = new LinkedList<>();
 
     /**
      * Constructs a new Customer with the specified attributes.
@@ -93,9 +92,9 @@ public class Customer implements Person{
     }
 
     /**
-     * Get phone num string.
+     * Get phone number string.
      *
-     * @return the string
+     * @return the string formatted
      */
     public String getPhoneNum(){
         return String.format("(%s) %s-%s", this.phoneNum.substring(0, 3), this.phoneNum.substring(3, 6), this.phoneNum.substring(6));
@@ -275,6 +274,11 @@ public class Customer implements Person{
         this.transactions.add(transaction);
     }
 
+    /**
+     * Get customers formatted full name.
+     *
+     * @return customers formatted full name.
+     */
     @Override
     public String getFullName() {
         String firstName = this.getFirstName();

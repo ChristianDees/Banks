@@ -96,6 +96,7 @@ public class CustomerInterface extends UserInterface{
      * @param fh    file handler object to log to files when needed.
      */
     public void handleNewCustomer(Scanner scan, FileHandler fh) {
+        String[] defaultHeaders = {"Identification Number", "First Name", "Last Name", "Date of Birth", "Address", "Phone Number", "Checking Account Number", "Checking Starting Balance", "Savings Account Number", "Savings Starting Balance", "Credit Account Number", "Credit Max", "Credit Starting Balance"};
         out.println("Please fill out the following information:");
         String[][] prompts = {
                 {"First Name: ", "[a-zA-Z]+"},
@@ -109,6 +110,7 @@ public class CustomerInterface extends UserInterface{
         };
         List<String> recordFormatted = new ArrayList<>();
         String[] record = new String[prompts.length + 1]; // +1 for the customer ID
+        TreeSet<Integer> customerIDs = BankDatabase.getInstance().getCustomerIDs();
         record[0] = String.valueOf(customerIDs.last() + 1);
         for (int i = 0; i < prompts.length; i++) {
             record[i + 1] = requestCustomerInfo(scan, prompts[i][0], prompts[i][1], fh);
@@ -127,15 +129,15 @@ public class CustomerInterface extends UserInterface{
         recordFormatted.add(record[3]);                                     // dob
         recordFormatted.add(formattedAddress);                              // address
         recordFormatted.add(record[8]);
-        recordFormatted.add(String.valueOf(checkingAccNums.last() + 1)); // checking account number
+        recordFormatted.add(String.valueOf(BankDatabase.getInstance().getCheckingAccNums().last() + 1)); // checking account number
         recordFormatted.add(String.valueOf(0));                          // checking current balance
-        recordFormatted.add(String.valueOf(savingsAccNums.last() + 1));  // savings account number
+        recordFormatted.add(String.valueOf(BankDatabase.getInstance().getSavingsAccNums().last() + 1));  // savings account number
         recordFormatted.add(String.valueOf(0));                          // savings current balance
-        recordFormatted.add(String.valueOf(creditAccNums.last() + 1));   // credit account number
+        recordFormatted.add(String.valueOf(BankDatabase.getInstance().getCreditAccNums().last() + 1));   // credit account number
         recordFormatted.add(String.valueOf(0));                          // credit current balance
         recordFormatted.add(String.valueOf(0));                          // credit max
         Dictionary<String, String> recordDict = fh.recordToDictionary(recordFormatted.toArray(new String[0]), defaultHeaders);
-        boolean rc = addCustomer(recordDict);
+        boolean rc = BankDatabase.getInstance().addCustomer(recordDict);
         if (rc) out.println("\n* * * Successfully added new customer. * * *\n");
         else out.println("\n* * * Failed to add new customer. * * *\n");
     }

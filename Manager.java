@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public class Manager implements Person{
-
+    
     String firstName;
     String lastName;
 
@@ -31,12 +31,12 @@ public class Manager implements Person{
 
         for (Dictionary<String, String> recordDict : allRecords) {
             String fromCustomerName = (recordDict.get("From First Name") + recordDict.get("From Last Name")).toLowerCase();
-            Customer fromCustomer = BankRegistry.customers.get(fromCustomerName);
+            Customer fromCustomer = BankDatabase.customers.get(fromCustomerName);
 
             if (fromCustomer != null) {
                 String action = recordDict.get("Action").toLowerCase();
                 String toCustomerName = (recordDict.get("To First Name") + recordDict.get("To Last Name")).toLowerCase();
-                Customer toCustomer = BankRegistry.customers.get(toCustomerName);
+                Customer toCustomer = BankDatabase.customers.get(toCustomerName);
 
                 Account fromAccount = null;
                 for (Account account : fromCustomer.getAccounts()) {
@@ -91,6 +91,11 @@ public class Manager implements Person{
         }
     }
 
+    /**
+     * Generates a bank statement for a specified user.
+     *
+     * @param customer whose statement to generate.
+     */
     public void generateBankStatement(Customer customer){
         if (customer==null)return;
         LinkedList<String> transactions = customer.getTransactions();
@@ -108,6 +113,11 @@ public class Manager implements Person{
         } else System.out.println("\n*  *  *  *  Unable to export " + name + "'s bank statement. There are no transactions to export.  *  *  *  *\n");
     }
 
+    /**
+     * Get customers formatted full name.
+     *
+     * @return customers formatted full name.
+     */
     @Override
     public String getFullName() {
         return this.firstName + " " + this.lastName;

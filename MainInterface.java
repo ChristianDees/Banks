@@ -14,6 +14,7 @@ import static java.lang.System.out;
  * Represents an object to handle input for the bank
  */
 public class MainInterface extends UserInterface{
+
     private boolean exit = false;
     /**
      * Query for user's role to log in
