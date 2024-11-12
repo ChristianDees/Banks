@@ -15,7 +15,11 @@ import static java.lang.System.out;
  */
 public class MainInterface extends UserInterface{
 
+    /**
+     * Flag indicating if user requested to exit the bank.
+     */
     private boolean exit = false;
+
     /**
      * Query for user's role to log in
      *

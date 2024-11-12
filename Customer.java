@@ -134,6 +134,7 @@ public class Customer implements Person{
     /**
      * Prints an account's information if it exists.
      *
+     * @param account       Account to be viewed
      * @param viewBalance   Print the balance if true, don't if false.
      */
     public void viewAccount(Account account, boolean viewBalance) {
@@ -190,6 +191,7 @@ public class Customer implements Person{
      * @param src       The source account that the amount will be withdrawn from.
      * @param dst       The destination account that the amount will be deposited to.
      * @param amount    The amount of money to be sent.
+     * @param toCustomer The customer receiving funds.
      *
      * @return          The successfulness of money being sent.
      * **/

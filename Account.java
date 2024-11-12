@@ -62,12 +62,20 @@ public abstract class Account {
         return this.getClass().getName();
     }
 
+    /**
+     * Get the account's transaction list.
+     *
+     * @return  the account's transaction linked list.
+     */
     public TransactionLinkedList getTransactionList() {
         return this.transactionList;}
 
     /**
-     * Add money to an account.
-     **/
+     * Success indicating that deposit was successful.
+     *
+     * @param amount    amount to be deposited.
+     * @return          success/fail of deposit.
+     */
     public boolean deposit(double amount){
         this.balance += amount;
         return true;
@@ -76,7 +84,9 @@ public abstract class Account {
     /**
      * Take money out of an account.
      *
-     * @return  The successfulness of a withdrawal.
+     * @param amount    amount to be withdrawn.
+     *
+     * @return          The successfulness of a withdrawal.
      * **/
     public boolean withdraw(double amount){
         if (amount <= this.balance && amount > 0){
@@ -91,6 +101,8 @@ public abstract class Account {
      * Print attributes of an account
      *
      * @param showBalance  Print the balance along with other attributes.
+     *
+     * @param printHeader  Flag to print header or not.
      **/
     public void printAccount(boolean showBalance, boolean printHeader) {
         if (printHeader) this.printHeader(showBalance);
@@ -140,6 +152,8 @@ public abstract class Account {
      * Adds a transaction string to transaction LL.
      *
      * @param description string that describes the transaction.
+     *
+     * @param amount      to be transacted
      */
     public void addTransaction(String description, double amount){
         this.transactionList.addTransaction(LocalDate.now().format(DateTimeFormatter.ofPattern("MM-dd-yyyy")), description, amount, this.getBalance());

@@ -1,6 +1,9 @@
 import java.util.ArrayList;
 import java.util.Dictionary;
 
+/**
+ * Represents a manager.
+ */
 public class Manager implements Person{
 
     String firstName;

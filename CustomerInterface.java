@@ -8,15 +8,18 @@
 // Honesty Statement: We affirm that we have completed this assignment entirely on our own, without any assistance from outside sources, including peers, experts, online resources, or other means. All code and ideas were that of our own work, and we have followed proper academic integrity.
  */
 import java.util.*;
-
 import static java.lang.System.out;
 
+/**
+ * Represents the interface between the customer and the system.
+ */
 public class CustomerInterface extends UserInterface{
 
     /**
      * Query for the total transactions the user will perform.
      *
      * @param scan          The scanner object to continue taking input.
+     * @param fh            File handler object to read/write to files.
      */
     public void handleCustomer(Scanner scan, FileHandler fh) {
         int attempts = 0;

@@ -16,6 +16,7 @@ public class ManagerInterface extends UserInterface{
      * Handle the interaction for a manager.
      *
      * @param scan The scanner object to continue taking input.
+     * @param fh   File handler object to read/write files.
      */
     public void handleManager(Scanner scan, FileHandler fh) {
         int attempts = 0;

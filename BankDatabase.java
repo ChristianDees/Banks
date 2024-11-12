@@ -11,18 +11,51 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.TreeSet;
 
+/**
+ * Represents the database of the bank.
+ */
 public class BankDatabase {
 
+    /**
+     * One instance of database.
+     */
     private static BankDatabase instance;
+    /**
+     * Customer name: Customer object
+     */
     public static  Dictionary<String, Customer> customers = new Hashtable<>();
+    /**
+     * Checking account id number: Checking account object
+     */
     public static  Dictionary<Integer, Checking> checkingAccounts = new Hashtable<>();
+    /**
+     * Saving account id number: Saving account object
+     */
     public static  Dictionary<Integer, Savings> savingAccounts = new Hashtable<>();
+    /**
+     * Credit account id number: Credit account object
+     */
     public static final Dictionary<Integer, Credit> creditAccounts = new Hashtable<>();
+    /**
+     * In order of customer IDs
+     */
     public static  TreeSet<Integer> customerIDs = new TreeSet<>();
+    /**
+     * In order of checking account numbers
+     */
     public static final TreeSet<Integer> checkingAccNums = new TreeSet<>();
+    /**
+     * In order of saving account numbers
+     */
     public static final TreeSet<Integer> savingsAccNums = new TreeSet<>();
+    /**
+     * In order of credit account numbers
+     */
     public static final TreeSet<Integer> creditAccNums = new TreeSet<>();
 
+    /**
+     * Initialize bank database singleton.
+     */
     private BankDatabase(){
         /* prevent instantiation */
     }

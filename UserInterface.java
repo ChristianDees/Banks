@@ -12,7 +12,15 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import static java.lang.System.out;
 
+/**
+ * Represents the user interface between the user and the system.
+ */
 public abstract class UserInterface {
+
+
+    /**
+     * Flag if user has requested to log out.
+     */
     public static boolean logout = false;
 
     /**
@@ -50,7 +58,11 @@ public abstract class UserInterface {
      * Handle a transaction with one account.
      *
      * @param scan          The scanner object to continue taking input.
+     * @param viewAccounts  Flag to show accounts.
      * @param viewBalance   Flag to show balance.
+     * @param fh            File handler object to read/write to files
+     *
+     * @return              Customer based on the username given.
      */
     public Customer getUserName(Scanner scan, boolean viewAccounts, boolean viewBalance, FileHandler fh) {
         // three attempts
@@ -92,6 +104,9 @@ public abstract class UserInterface {
      *
      * @param scan          The scanner object to continue taking input.
      * @param customer      The customer who is answering the question.
+     * @param fh            File handler object to read/write to files.
+     *
+     * @return              Account inquired from customer.
      */
     public Account getAccountForTransaction(Scanner scan, Customer customer, FileHandler fh) {
         // three attempts

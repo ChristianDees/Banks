@@ -36,6 +36,8 @@ public class FileHandler {
      * Add provided account to respective dictionary
      *
      * @param account provided account to add
+     *
+     * @return flag if success or not.
      */
     public boolean addAccountToMaps(Account account) {
         boolean rc = false;
@@ -138,6 +140,7 @@ public class FileHandler {
      * Append message to a log (txt).
      *
      * @param filename the filename.
+     * @param msg      message to be appended.
      */
     public void appendLog(String filename, String msg) {
         File file = new File(filename+".txt");

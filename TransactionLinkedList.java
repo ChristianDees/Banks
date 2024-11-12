@@ -7,7 +7,15 @@ import java.util.List;
  * Linked list for transactions of an account.
  */
 public class TransactionLinkedList {
+
+    /**
+     * Head of linked list.
+     */
     private TransactionNode head;
+
+    /**
+     * Initial balance before any transactions.
+     */
     public final double startingBalance;
 
     /**
