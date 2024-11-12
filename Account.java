@@ -10,6 +10,10 @@
 import java.text.NumberFormat;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Represents an Account with its unique account number and current balance
@@ -17,6 +21,7 @@ import java.math.RoundingMode;
 public abstract class Account {
     int accNum;
     double balance;
+    TransactionLinkedList transactionList;
 
     /**
      * Constructs a new Account with the specified attributes.
@@ -27,6 +32,7 @@ public abstract class Account {
     Account(int accNum, double startBalance){
         this.accNum = accNum;
         this.balance = startBalance;
+        this.transactionList = new TransactionLinkedList(this.getBalance());
     }
 
     /**
@@ -58,6 +64,9 @@ public abstract class Account {
         return this.getClass().getName();
     }
 
+    public TransactionLinkedList getTransactionList() {
+        return this.transactionList;}
+
     /**
      * Add money to an account.
      **/
@@ -87,14 +96,21 @@ public abstract class Account {
      **/
     public void printAccount(boolean showBalance, boolean printHeader) {
         if (printHeader) this.printHeader(showBalance);
+
         NumberFormat formatter = NumberFormat.getCurrencyInstance();
-        // print the balance
+        // Ensure we have a consistent width for currency formatting.
+        String formattedBalance = formatter.format(this.getBalance());
+
+
+        // print the balance and other attributes
+
         if (showBalance) {
-            System.out.printf("| %-15s | %-20s | %-16s |\n",
+            System.out.printf("| %-15s | %-20s | %-20s | %-20s | \n",
                     this.getType(),
                     this.getAccountNumber(),
-                    formatter.format(this.getBalance()));
-            System.out.println("+-----------------+----------------------+------------------+");
+                    formattedBalance,
+                    "None");
+            System.out.println("+-----------------+----------------------+----------------------+----------------------+");
         } else {
             System.out.printf("| %-15s | %-20s |\n",
                     this.getType(),
@@ -110,16 +126,25 @@ public abstract class Account {
      */
     public void printHeader(boolean showBalance){
         if (showBalance) {
-            // full header
-            System.out.println("+-----------------+----------------------+------------------+");
-            System.out.printf("| %-15s | %-20s | %-16s |\n", "Type", "Account Number", "Balance");
-            System.out.println("+-----------------+----------------------+------------------+");
+            // Full header with adjusted column widths
+            System.out.println("+-----------------+----------------------+----------------------+----------------------+");
+            System.out.printf("| %-15s | %-20s | %-20s | %-20s | \n", "Type", "Account Number", "Balance", "Limit");
+            System.out.println("+-----------------+----------------------+----------------------+----------------------+");
         } else {
-            // partial header
+            // Partial header for when balance and limit are not shown
             System.out.println("+-----------------+----------------------+");
             System.out.printf("| %-15s | %-20s |\n", "Type", "Account Number");
             System.out.println("+-----------------+----------------------+");
         }
+    }
+
+    /**
+     * Adds a transaction string to transaction LL.
+     *
+     * @param description string that describes the transaction.
+     */
+    public void addTransaction(String description, double amount){
+        this.transactionList.addTransaction(LocalDate.now().format(DateTimeFormatter.ofPattern("MM-dd-yyyy")), description, amount, this.getBalance());
     }
 
     /**

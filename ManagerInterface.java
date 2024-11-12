@@ -23,7 +23,7 @@ public class ManagerInterface extends UserInterface{
         while(attempts < 3){
             if (this.leave()) return;
             // provide options
-            out.print("A. Inquire accounts by customer name.\nB. Inquire account by type/number.\nC. Perform transaction from file.\nD. Generate Bank Statement for Customer\n> ");
+            out.print("A. Inquire accounts by customer name.\nB. Inquire account by type/number.\nC. Perform transaction from file.\nD. Generate Bank Statement for Customer's Account. \nE. Generate Bank Statement for all Customer Accounts.\n> ");
             String input = scan.nextLine().trim().toLowerCase();
             if (logout(input)) return;
             Manager manager = new Manager("fake", "fake");
@@ -40,8 +40,12 @@ public class ManagerInterface extends UserInterface{
                     manager.transactFromFile(filename);
                     break;
                 case "d":
-                    Customer customer = getUserName(scan, false, false, fh);
-                    manager.generateBankStatement(customer);
+                    Customer customerOneTrans = getUserName(scan, false, false, fh);
+                    getTimeRange(scan, customerOneTrans, fh, false, "BankStatements", "Statement");
+                    break;
+                case "e":
+                    Customer customerAllTrans = getUserName(scan, false, false, fh);
+                    getTimeRange(scan, customerAllTrans, fh, true, "BankStatements", "Statement");
                     break;
                 default:
                     // error logging

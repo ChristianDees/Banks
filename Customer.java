@@ -9,8 +9,7 @@
  */
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.*;
 
 /**
  * Represents a customer with their accounts, dob, address, phone number, and unique id number
@@ -22,8 +21,8 @@ public class Customer implements Person{
     String dob;
     String address;
     String phoneNum;
+    int creditScore;
     ArrayList<Account> accounts = new ArrayList<>();
-    LinkedList<String> transactions = new LinkedList<>();
 
     /**
      * Constructs a new Customer with the specified attributes.
@@ -42,6 +41,7 @@ public class Customer implements Person{
         this.dob = dob;
         this.address = address;
         this.phoneNum = phoneNum;
+        this.creditScore = 0;
     }
 
     /**
@@ -110,13 +110,11 @@ public class Customer implements Person{
     }
 
     /**
-     * Get customer's transactions
+     * Get the customer's credit score.
      *
-     * @return customer's transactions
+     * @return customer's credit score.
      */
-    public LinkedList<String> getTransactions(){
-        return this.transactions;
-    }
+    public int getCreditScore() { return this.creditScore; }
 
     /**
      * Prints an account's information if it exists.
@@ -124,10 +122,15 @@ public class Customer implements Person{
      * @param viewBalance   Print the balance if true, don't if false.
      */
     public void viewAccounts(boolean viewBalance) {
-        for (int i = 0; i < this.accounts.size(); i++) {
-            boolean isFirstAccount = (i == 0);
-            this.accounts.get(i).printAccount(viewBalance, isFirstAccount);
+        boolean creditAccountExists = accounts.stream().anyMatch(account -> "Credit".equals(account.getType()));
+        if (creditAccountExists) {
+            Credit creditAccount = (Credit) accounts.stream().filter(account -> "Credit".equals(account.getType())).findFirst().orElse(null);
+            if (creditAccount != null) creditAccount.printHeader(viewBalance);
+        } else if (!accounts.isEmpty()) {
+            accounts.getFirst().printHeader(viewBalance);
         }
+
+        accounts.forEach(account -> account.printAccount(viewBalance, false));
     }
 
     /**
@@ -150,6 +153,9 @@ public class Customer implements Person{
      */
     public void addAccount(Account account){
         this.accounts.add(account);
+        if (account.getType().equals("Credit")){
+            this.creditScore = generateCreditScore((Credit) account);
+        }
     }
 
     /**
@@ -167,14 +173,14 @@ public class Customer implements Person{
             return false;
         }
         boolean rc = src.withdraw(amount) && dst.deposit(amount);
-        String transactionMessage = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) +
-                "," + "TRANSFER" + ","  + src.getType() + "," + src.getAccountNumber() + "," +
-                dst.getType() + "," + dst.getAccountNumber() + "," +
-                String.format("%.2f", amount) + "," + dst.getBalance();
+        String transferMsg = "Transfer of funds to " + dst.getType() + " [id=" + dst.getAccountNumber() + "]";
+        String receiveMsg = "Transfer of funds from " + src.getType() + " [id=" + src.getAccountNumber() + "]";
         if (rc) {
-            this.addTransaction(transactionMessage);
-            System.out.println("\n*  *  *  *  *  *  *  Transfer Successful  *  *  *  *  *  *  *");
-        } else System.out.println("\n*  *  *  *  *  *  *    Transfer Failed    *  *  *  *  *  *  *");
+            src.addTransaction(transferMsg, amount);
+            dst.addTransaction(receiveMsg, amount);
+            System.out.println("\n*  *  *  *  *  *  *  *  *  *  *  *  Transfer Successful  *  *  *  *  *  *  *  *  *  *  *");
+        }
+        else System.out.println("\n*  *  *  *  *  *  *  *  *  *  *  *    Transfer Failed    *  *  *  *  *  *  *  *  *  *  *");
         src.printAccount(true, true);
         dst.printAccount(true, false);
         return rc;
@@ -195,19 +201,13 @@ public class Customer implements Person{
             return false;
         }
         boolean rc = src.withdraw(amount) && dst.deposit(amount);
-        String transactionMessage = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) +
-                "," + "SEND" + ","  + src.getType() + "," + src.getAccountNumber() + "," +
-                toCustomer.getFullName() + "," + toCustomer.getId() + "," +
-                String.format("%.2f", amount) + "," + src.getBalance();
-        String depositMessage = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) +
-                "," + "RECEIVE" + "," + this.getFullName() + "," + this.getId() + "," +
-                dst.getType() + "," + dst.getAccountNumber() + "," +
-                String.format("%.2f", amount) + "," + dst.getBalance();
+        String transactionMessage = "Sent funds to " + toCustomer.getFullName();
+        String depositMessage = "Received funds from " + this.getFullName();
         if (rc) {
-            toCustomer.addTransaction(depositMessage);
-            this.addTransaction(transactionMessage);
-            System.out.println("\n*  *  *  *  *  *  *    Send Successful    *  *  *  *  *  *  *");
-        } else System.out.println("*  *  *  *  *  *  *      Send Failed      *  *  *  *  *  *  *");
+            dst.addTransaction(depositMessage, amount);
+            src.addTransaction(transactionMessage, amount);
+            System.out.println("\n*  *  *  *  *  *  *  *  *  *  *  *    Send Successful    *  *  *  *  *  *  *  *  *  *  *");
+        } else System.out.println("*  *  *  *  *  *  *  *  *  *  *  *      Send Failed      *  *  *  *  *  *  *  *  *  *  *");
         src.printAccount(true, true);
         dst.printAccount(false, false);
         return rc;
@@ -227,13 +227,11 @@ public class Customer implements Person{
         }
         boolean rc = src.withdraw(amount);
         if (rc) {
-            String transactionMessage = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) +
-                    "," + "WITHDRAWAL" + ","  + src.getType() + "," + src.getAccountNumber() + "," +
-                    " " + "," + " " + "," +
-                    String.format("%.2f", amount) + "," + src.getBalance();
-            this.addTransaction(transactionMessage);
-            System.out.println("\n*  *  *  *  *  *  *  Withdraw Successful  *  *  *  *  *  *  *");
-        } else System.out.println("\n*  *  *  *  *  *  *    Withdraw Failed    *  *  *  *  *  *  *");
+            String transactionMessage = "Withdrawal of funds";
+            src.addTransaction(transactionMessage, amount);
+            System.out.println("\n*  *  *  *  *  *  *  *  *  *  *  *  Withdraw Successful  *  *  *  *  *  *  *  *  *  *  *");
+        }
+        else System.out.println("\n*  *  *  *  *  *  *  *  *  *  *  *    Withdraw Failed    *  *  *  *  *  *  *  *  *  *  *");
         src.printAccount(true, true);
         return rc;
     }
@@ -252,26 +250,38 @@ public class Customer implements Person{
         }
         boolean rc = src.deposit(amount);
         if (rc) {
-            String transactionMessage = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) +
-                    "," + "DEPOSIT" + ","  + " " + "," + " " + "," +
-                    src.getType() + "," + src.getAccountNumber() + "," +
-                    String.format("%.2f", amount) + "," + src.getBalance();
-            this.addTransaction(transactionMessage);
-            System.out.println("\n*  *  *  *  *  *  *  Deposit Successful   *  *  *  *  *  *  *");
-        } else {
-            System.out.println("\n*  *  *  *  *  *  *    Deposit Failed    *  *  *  *  *  *  *");
-        }
+            String transactionMessage = "Deposit of funds";
+            src.addTransaction(transactionMessage, amount);
+            System.out.println("\n*  *  *  *  *  *  *  *  *  *  *  *  Deposit Successful   *  *  *  *  *  *  *  *  *  *  *");
+        } else System.out.println("\n*  *  *  *  *  *  *  *  *  *  *  *     Deposit Failed    *  *  *  *  *  *  *  *  *  *  *");
         src.printAccount(true, true);
         return rc;
     }
 
     /**
-     * Adds a transaction string to transaction LL.
+     * Generated random credit score for a customer.
      *
-     * @param transaction string that describes the transaction.
+     * @param account   based on their credit account limit.
+     * @return          the credit score.
      */
-    private void addTransaction(String transaction){
-        this.transactions.add(transaction);
+    private int generateCreditScore(Credit account) {
+        double limit = account.getCreditMax();
+        Random random = new Random();
+        int lower, upper;
+        if (limit >= 100 && limit <= 699) {
+            lower = 0; upper = 580;
+        } else if (limit >= 700 && limit <= 4999) {
+            lower = 581; upper = 669;
+        } else if (limit >= 5000 && limit <= 7499) {
+            lower = 670; upper = 739;
+        } else if (limit >= 7500 && limit <= 15999) {
+            lower = 740; upper = 799;
+        } else if (limit >= 16000 && limit <= 25000) {
+            lower = 800; upper = 850;
+        } else {
+            return 0;
+        }
+        return random.nextInt(upper - lower + 1) + lower;
     }
 
     /**

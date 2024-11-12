@@ -8,6 +8,7 @@
 // Honesty Statement: We affirm that we have completed this assignment entirely on our own, without any assistance from outside sources, including peers, experts, online resources, or other means. All code and ideas were that of our own work, and we have followed proper academic integrity.
  */
 import java.io.*;
+import java.text.ParseException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -74,8 +75,10 @@ public class FileHandler {
      */
     public void exportCustomerReportToCSV(String filename) {
         filename = "BankReports/"+filename+".csv";
-        String[] defaultHeaders = {"Identification Number", "First Name", "Last Name", "Date of Birth", "Address", "Phone Number", "Checking Account Number", "Checking Starting Balance", "Savings Account Number", "Savings Starting Balance", "Credit Account Number", "Credit Max", "Credit Starting Balance"};
+        String[] defaultHeaders = {"Identification Number", "First Name", "Last Name", "Date of Birth", "Address", "Phone Number", "Checking Account Number", "Checking Starting Balance", "Savings Account Number", "Savings Starting Balance", "Credit Account Number", "Credit Starting Balance", "Credit Max"};
         // write to file
+        File file = new File(filename);
+        if (file.exists()) file.setWritable(true);
         try (FileWriter writer = new FileWriter(filename, false)) {
             // add quotes if string has commas
             Function<String, String> escapeValue = value -> {
@@ -122,9 +125,12 @@ public class FileHandler {
                 customerData[12] = creditBalance;
                 writer.write(String.join(",", customerData) + System.lineSeparator());
             }
+
             out.println("\n* * * Successfully exported data to " + filename + " * * *");
         } catch (IOException e) {
             out.println("An error occurred while writing to the CSV file: " + e.getMessage());
+        } finally {
+            file.setWritable(false);
         }
     }
 
@@ -134,11 +140,15 @@ public class FileHandler {
      * @param filename the filename.
      */
     public void appendLog(String filename, String msg) {
+        File file = new File(filename+".txt");
+        if (file.exists()) file.setWritable(true);
         try (FileWriter myWriter = new FileWriter(filename + ".txt", true)) {
             // append message to text file
             myWriter.write(msg + System.lineSeparator());
         } catch (IOException e) {
             out.println("An error occurred while writing to the log file: " + e.getMessage());
+        } finally {
+            file.setWritable(false);
         }
     }
 
@@ -197,27 +207,43 @@ public class FileHandler {
     }
 
     /**
-     * Append message to a log (txt).
+     * Generates a file of the user's transactions.
      *
-     * @param filename the filename.
+     * @param filename  name of file.
+     * @param customer  customer of whom is to be inquired.
+     * @param account   account for the transactions.
+     * @param startDate start range.
+     * @param endDate   end range.
+     * @return          true if successful, false if not.
+     * @throws ParseException for dates.
      */
-    public void appendStatement(String filename, String msg) {
-        File file = new File(filename + ".csv");
-        boolean fileExists = file.exists();
-        try (FileWriter myWriter = new FileWriter(file, true)) {
-            if (!fileExists) {
-                myWriter.write("Customer, Address, Phone" + System.lineSeparator());
-                myWriter.write(msg+ System.lineSeparator());
-                String headers = "Date, Action, From, FromID, To, ToID, Amount, Balance";
-                myWriter.write(headers + System.lineSeparator());
-            } else {
-                myWriter.write(msg + System.lineSeparator());
+    public boolean generateUserTransactionsFile(String filename, Customer customer, Account account, String startDate, String endDate) throws ParseException {
+        double startingBalance = account.getTransactionList().startingBalance;
+        List<TransactionNode> filteredTransactions = account.getTransactionList().getTransactionsBetweenDates(startDate, endDate);
+        File file = new File(filename);
+        try {
+            if (file.exists()) file.setWritable(true);
+            try (FileWriter myWriter = new FileWriter(file, true)) {
+                String header = String.format("Name: %s\nID: %s\nAccount: %s\nAccount ID: %s\nStarting Balance: $%.2f\nStatement Period: %s to %s\n==================================================\n",
+                        customer.getFullName(), customer.getId(), account.getType(), account.getAccountNumber(), startingBalance, startDate, endDate);
+                myWriter.write(header);
+                for (TransactionNode trans : filteredTransactions) {
+                    String transactionDetails = String.format("Date: %s\nDescription: %s\nAmount: $%.2f\nNew Balance: $%.2f\n-------------------------------------\n",
+                            trans.date, trans.description, trans.amount, trans.newBalance);
+                    myWriter.write(transactionDetails);
+                }
+                String footer = String.format("Ending balance: $%.2f\n==================================================\n", account.getBalance());
+                myWriter.write(footer);
             }
-        } catch (IOException e) {
-            System.out.println("An error occurred while writing to the log file: " + e.getMessage());
-        }
-    }
+            return true;
 
+        } catch (IOException e) {
+            System.out.println("Error writing to file: " + e.getMessage());
+        } finally {
+            file.setWritable(false);
+        }
+        return false;
+    }
 }
 
 

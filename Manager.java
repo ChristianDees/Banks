@@ -3,9 +3,12 @@ import java.util.Dictionary;
 import java.util.LinkedList;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Set;
+
+import static java.lang.System.out;
 
 public class Manager implements Person{
-    
+
     String firstName;
     String lastName;
 
@@ -91,33 +94,7 @@ public class Manager implements Person{
         }
     }
 
-    /**
-     * Generates a bank statement for a specified user.
-     *
-     * @param customer whose statement to generate.
-     */
-    public void generateBankStatement(Customer customer){
-        if (customer==null)return;
-        LinkedList<String> transactions = customer.getTransactions();
-        String name = customer.getFullName();
-        String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        String filename = "BankStatements/"+name.replace(" ", "")+"Statement"+date;
 
-        FileHandler fh = new FileHandler();
-        if (!transactions.isEmpty()) {
-            fh.appendStatement(filename, customer.getFullName() + "," + "\""+customer.getAddress()+"\""+ "," + customer.getPhoneNum());
-            for (String transaction : transactions) {
-                fh.appendStatement(filename, transaction);
-            }
-            System.out.println("\n*  *  *  *  Successfully exported " + name + "'s bank statement to "+ filename +"  *  *  *  *\n");
-        } else System.out.println("\n*  *  *  *  Unable to export " + name + "'s bank statement. There are no transactions to export.  *  *  *  *\n");
-    }
-
-    /**
-     * Get customers formatted full name.
-     *
-     * @return customers formatted full name.
-     */
     @Override
     public String getFullName() {
         return this.firstName + " " + this.lastName;

@@ -7,6 +7,9 @@
 // Lab Description: This lab is meant to demonstrate our knowledge in object-oriented concepts such as inheritance, polymorphism, UML diagrams, and more through coding our own implementation of a bank system of which deposits, withdraws, transfer, and pays. This lab also included concepts of logging, testing, debugging, file reading, and JavaDoc.
 // Honesty Statement: We affirm that we have completed this assignment entirely on our own, without any assistance from outside sources, including peers, experts, online resources, or other means. All code and ideas were that of our own work, and we have followed proper academic integrity.
  */
+
+import java.text.NumberFormat;
+
 /**
  * Represents a credit account with its balance, unique account number, and a maximum allowed credit debt
  */
@@ -61,5 +64,30 @@ public class Credit extends Account{
      */
     public double getCreditMax(){
         return this.creditMax;
+    }
+
+    /**
+     * Print attributes of an account
+     *
+     * @param showBalance  Print the balance along with other attributes.
+     **/
+    public void printAccount(boolean showBalance, boolean printHeader) {
+        if (printHeader) this.printHeader(showBalance);
+        NumberFormat formatter = NumberFormat.getCurrencyInstance();
+        String formattedBalance = formatter.format(this.getBalance());
+        String formattedCreditMax = formatter.format(this.getCreditMax());
+        if (showBalance) {
+            System.out.printf("| %-15s | %-20s | %-20s | %-20s | \n",
+                    this.getType(),
+                    this.getAccountNumber(),
+                    formattedBalance,
+                    formattedCreditMax);
+            System.out.println("+-----------------+----------------------+----------------------+----------------------+");
+        } else {
+            System.out.printf("| %-15s | %-20s |\n",
+                    this.getType(),
+                    this.getAccountNumber());
+            System.out.println("+-----------------+----------------------+");
+        }
     }
 }

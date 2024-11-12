@@ -7,6 +7,8 @@
 // Lab Description: This lab is meant to demonstrate our knowledge in object-oriented concepts such as inheritance, polymorphism, UML diagrams, and more through coding our own implementation of a bank system of which deposits, withdraws, transfer, and pays. This lab also included concepts of logging, testing, debugging, file reading, and JavaDoc.
 // Honesty Statement: We affirm that we have completed this assignment entirely on our own, without any assistance from outside sources, including peers, experts, online resources, or other means. All code and ideas were that of our own work, and we have followed proper academic integrity.
  */
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static java.lang.System.out;
@@ -32,7 +34,7 @@ public class CustomerInterface extends UserInterface{
                         // three attempts
                         while(attempts < 3){
                             if (leave()) return;
-                            out.print("Choose a transaction:\nA. Transaction between single person.\nB. Transaction between two people.\n> ");
+                            out.print("Choose a transaction:\nA. Transaction between single person.\nB. Transaction between two people.\nC. Generate transactions file (for specific account).\nD. Generate all user transactions.\n> ");
                             input = scan.nextLine().trim().toLowerCase();
                             if (logout(input)) return;
                             TransactionInterface transaction = new TransactionInterface();
@@ -42,6 +44,12 @@ public class CustomerInterface extends UserInterface{
                                     break;
                                 case "b":
                                     transaction.twoAccountTransaction(scan, customer, null, false, fh);
+                                    break;
+                                case "c":
+                                    this.getTimeRange(scan, customer, fh, false, "UserTransactions", "Transactions");
+                                    break;
+                                case "d":
+                                    this.getTimeRange(scan, customer, fh, true, "UserTransactions", "Transactions");
                                     break;
                                 default:
                                     // error logging
@@ -96,7 +104,7 @@ public class CustomerInterface extends UserInterface{
      * @param fh    file handler object to log to files when needed.
      */
     public void handleNewCustomer(Scanner scan, FileHandler fh) {
-        String[] defaultHeaders = {"Identification Number", "First Name", "Last Name", "Date of Birth", "Address", "Phone Number", "Checking Account Number", "Checking Starting Balance", "Savings Account Number", "Savings Starting Balance", "Credit Account Number", "Credit Max", "Credit Starting Balance"};
+        String[] defaultHeaders = {"Identification Number", "First Name", "Last Name", "Date of Birth", "Address", "Phone Number", "Checking Account Number", "Checking Starting Balance", "Savings Account Number", "Savings Starting Balance", "Credit Account Number", "Credit Starting Balance", "Credit Max"};
         out.println("Please fill out the following information:");
         String[][] prompts = {
                 {"First Name: ", "[a-zA-Z]+"},
@@ -123,19 +131,19 @@ public class CustomerInterface extends UserInterface{
                 record[7]                   // zip
         );
         // if everything checks out THEN add a new id
-        recordFormatted.add(record[0]);                                     // id
-        recordFormatted.add(record[1]);                                     // first name
-        recordFormatted.add(record[2]);                                     // last name
-        recordFormatted.add(record[3]);                                     // dob
-        recordFormatted.add(formattedAddress);                              // address
-        recordFormatted.add(record[8]);
+        recordFormatted.add(record[0]);                                                                     // id
+        recordFormatted.add(record[1]);                                                                     // first name
+        recordFormatted.add(record[2]);                                                                     // last name
+        recordFormatted.add(record[3]);                                                                     // dob
+        recordFormatted.add(formattedAddress);                                                              // address
+        recordFormatted.add(record[8]);                                                                     // phone number
         recordFormatted.add(String.valueOf(BankDatabase.getInstance().getCheckingAccNums().last() + 1)); // checking account number
-        recordFormatted.add(String.valueOf(0));                          // checking current balance
+        recordFormatted.add(String.valueOf(0));                                                          // checking current balance
         recordFormatted.add(String.valueOf(BankDatabase.getInstance().getSavingsAccNums().last() + 1));  // savings account number
-        recordFormatted.add(String.valueOf(0));                          // savings current balance
+        recordFormatted.add(String.valueOf(0));                                                          // savings current balance
         recordFormatted.add(String.valueOf(BankDatabase.getInstance().getCreditAccNums().last() + 1));   // credit account number
-        recordFormatted.add(String.valueOf(0));                          // credit current balance
-        recordFormatted.add(String.valueOf(0));                          // credit max
+        recordFormatted.add(String.valueOf(0));                                                          // credit current balance
+        recordFormatted.add(String.valueOf(100 + new Random().nextInt(25000 - 100 + 1)));         // credit max
         Dictionary<String, String> recordDict = fh.recordToDictionary(recordFormatted.toArray(new String[0]), defaultHeaders);
         boolean rc = BankDatabase.getInstance().addCustomer(recordDict);
         if (rc) out.println("\n* * * Successfully added new customer. * * *\n");
