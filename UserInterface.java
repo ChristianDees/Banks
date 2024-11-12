@@ -17,7 +17,6 @@ import static java.lang.System.out;
  */
 public abstract class UserInterface {
 
-
     /**
      * Flag if user has requested to log out.
      */
