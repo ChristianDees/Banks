@@ -8,9 +8,6 @@
 // Honesty Statement: We affirm that we have completed this assignment entirely on our own, without any assistance from outside sources, including peers, experts, online resources, or other means. All code and ideas were that of our own work, and we have followed proper academic integrity.
  */
 
-import java.text.ParseException;
-import java.util.Enumeration;
-
 /**
  * Represents the bank running
  */
@@ -21,7 +18,7 @@ public class RunBank {
      *
      * @param args the input arguments
      */
-    public static void main(String[] args) throws ParseException {
+    public static void main(String[] args) {
         FileHandler fh = new FileHandler();
         fh.getCustomersFromCSV("BankUsers"); // change to EPMB_REPORT SO ITS CONSISTENT
         MainInterface ui = new MainInterface();

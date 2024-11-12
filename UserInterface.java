@@ -147,7 +147,6 @@ public abstract class UserInterface {
      * @param type              Statement or User Transaction.
      */
     public void getTimeRange(Scanner scan, Customer customer, FileHandler fh, boolean allTransactions, String dir, String type){
-        int attempts = 0;
         // get the date from start and end
         Account account = null;
         if (!allTransactions) account = getAccountForTransaction(scan, customer, fh);

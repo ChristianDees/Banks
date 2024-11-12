@@ -78,7 +78,7 @@ public class FileHandler {
         String[] defaultHeaders = {"Identification Number", "First Name", "Last Name", "Date of Birth", "Address", "Phone Number", "Checking Account Number", "Checking Starting Balance", "Savings Account Number", "Savings Starting Balance", "Credit Account Number", "Credit Starting Balance", "Credit Max"};
         // write to file
         File file = new File(filename);
-        if (file.exists()) file.setWritable(true);
+        if (file.exists()) if (!file.setWritable(true)) System.out.println("An error occurred while attempting to set the file as writable. File: " + filename);
         try (FileWriter writer = new FileWriter(filename, false)) {
             // add quotes if string has commas
             Function<String, String> escapeValue = value -> {
@@ -130,7 +130,7 @@ public class FileHandler {
         } catch (IOException e) {
             out.println("An error occurred while writing to the CSV file: " + e.getMessage());
         } finally {
-            file.setWritable(false);
+            if (!file.setWritable(false)) System.out.println("An error occurred while attempting to set the file as read-only. File: " + filename);
         }
     }
 
@@ -141,14 +141,15 @@ public class FileHandler {
      */
     public void appendLog(String filename, String msg) {
         File file = new File(filename+".txt");
-        if (file.exists()) file.setWritable(true);
+        if (file.exists()) if (!file.setWritable(true)) System.out.println("An error occurred while attempting to set the file as writable. File: " + filename);
         try (FileWriter myWriter = new FileWriter(filename + ".txt", true)) {
             // append message to text file
             myWriter.write(msg + System.lineSeparator());
         } catch (IOException e) {
             out.println("An error occurred while writing to the log file: " + e.getMessage());
         } finally {
-            file.setWritable(false);
+            if (!file.setWritable(false)) System.out.println("An error occurred while attempting to set the file as read-only. File: " + filename);
+
         }
     }
 
@@ -222,7 +223,7 @@ public class FileHandler {
         List<TransactionNode> filteredTransactions = account.getTransactionList().getTransactionsBetweenDates(startDate, endDate);
         File file = new File(filename);
         try {
-            if (file.exists()) file.setWritable(true);
+            if (file.exists()) if (!file.setWritable(true)) System.out.println("An error occurred while attempting to set the file as writable. File: " + filename);
             try (FileWriter myWriter = new FileWriter(file, true)) {
                 String header = String.format("Name: %s\nID: %s\nAccount: %s\nAccount ID: %s\nStarting Balance: $%.2f\nStatement Period: %s to %s\n==================================================\n",
                         customer.getFullName(), customer.getId(), account.getType(), account.getAccountNumber(), startingBalance, startDate, endDate);
@@ -240,7 +241,7 @@ public class FileHandler {
         } catch (IOException e) {
             System.out.println("Error writing to file: " + e.getMessage());
         } finally {
-            file.setWritable(false);
+            if (!file.setWritable(false)) System.out.println("An error occurred while attempting to set the file as read-only. File: " + filename);
         }
         return false;
     }

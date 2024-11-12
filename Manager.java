@@ -1,11 +1,5 @@
 import java.util.ArrayList;
 import java.util.Dictionary;
-import java.util.LinkedList;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Set;
-
-import static java.lang.System.out;
 
 public class Manager implements Person{
 
@@ -35,12 +29,10 @@ public class Manager implements Person{
         for (Dictionary<String, String> recordDict : allRecords) {
             String fromCustomerName = (recordDict.get("From First Name") + recordDict.get("From Last Name")).toLowerCase();
             Customer fromCustomer = BankDatabase.customers.get(fromCustomerName);
-
             if (fromCustomer != null) {
                 String action = recordDict.get("Action").toLowerCase();
                 String toCustomerName = (recordDict.get("To First Name") + recordDict.get("To Last Name")).toLowerCase();
                 Customer toCustomer = BankDatabase.customers.get(toCustomerName);
-
                 Account fromAccount = null;
                 for (Account account : fromCustomer.getAccounts()) {
                     if (account.getType().equalsIgnoreCase(recordDict.get("From Where"))) {
@@ -48,7 +40,6 @@ public class Manager implements Person{
                         break;
                     }
                 }
-
                 Account toAccount = null;
                 if (toCustomer != null) {
                     for (Account account : toCustomer.getAccounts()) {
@@ -58,42 +49,41 @@ public class Manager implements Person{
                         }
                     }
                 }
-
                 if (fromAccount != null) {
                     double amount = recordDict.get("Action Amount").isEmpty() ? 0 : Double.parseDouble(recordDict.get("Action Amount"));
-                    boolean rc = false;
-
+                    boolean rc;
                     switch (action) {
                         case "pays":
                             rc = fromCustomer.send(fromAccount, toAccount, amount, toCustomer);
+                            if (!rc && toCustomer!=null) fh.appendLog("EPMB_Error_Log", fromCustomer.getFullName() + " [id=" + fromCustomer.getId() + "]"+ " attempted to send funds to "  + toCustomer.getFullName() + " [id=" + fromCustomer.getId() + "]"+ ".");
+                            if (!rc)fh.appendLog("EPMB_Error_Log", fromCustomer.getFullName() + " attempted to send funds without a valid receiving customer.");
                             break;
                         case "transfers":
                             rc = fromCustomer.transfer(fromAccount, toAccount, amount);
+                            if (!rc) fh.appendLog("EPMB_Error_Log", fromCustomer.getFullName() + " [id=" + fromCustomer.getId() + "]"+  " attempted to transfer invalidly.");
                             break;
                         case "inquires":
                             fromCustomer.viewAccount(fromAccount, true);
                             break;
                         case "withdraws":
                             rc = fromCustomer.withdraw(fromAccount, amount);
+                            if (!rc) fh.appendLog("EPMB_Error_Log", fromCustomer.getFullName()+ " [id=" + fromCustomer.getId() + "]" + " attempted to withdraw funds.");
                             break;
                         case "deposits":
                             rc = fromCustomer.deposit(toAccount, amount);
+                            if (!rc) fh.appendLog("EPMB_Error_Log", fromCustomer.getFullName()+ " [id=" + fromCustomer.getId() + "]" + " attempted to deposit funds.");
                             break;
                         default:
                             System.out.println("Invalid action: " + action);
                     }
-                    if (!rc && !action.equals("inquires")) {
-                        System.out.println("Action failed for " + action);
-                    }
                 } else {
-                    System.out.println("From account does not exist.");
+                    System.out.println("Transaction failed: No source account specified.");
                 }
             } else {
-                System.out.println("Customer from does not exist.");
+                System.out.println("Transaction failed: No source customer specified.");
             }
         }
     }
-
 
     @Override
     public String getFullName() {
