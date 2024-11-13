@@ -67,23 +67,37 @@ public class Manager implements Person{
                     switch (action) {
                         case "pays":
                             rc = fromCustomer.send(fromAccount, toAccount, amount, toCustomer);
-                            if (!rc && toCustomer!=null) fh.appendLog("EPMB_Error_Log", fromCustomer.getFullName() + " [id=" + fromCustomer.getId() + "]"+ " attempted to send funds to "  + toCustomer.getFullName() + " [id=" + fromCustomer.getId() + "]"+ ".");
-                            if (!rc)fh.appendLog("EPMB_Error_Log", fromCustomer.getFullName() + " attempted to send funds without a valid receiving customer.");
+                            if (!rc && toCustomer!=null) fh.appendLog("EPMB_Error_Log", fromCustomer.getFullName() + " [ID=" + fromCustomer.getId() + "]"+ " attempted to send funds to "  + toCustomer.getFullName() + " [ID=" + fromCustomer.getId() + "]"+ ".");
+                            else if (!rc)fh.appendLog("EPMB_Error_Log", fromCustomer.getFullName() + " attempted to send funds without a valid receiving customer.");
+                            else {
+                                assert toCustomer != null;
+                                fh.appendLog("EPMB_Transactions", fromCustomer.getFullName() + " [ID:" + fromCustomer.getId() + "] sent funds to " + toCustomer.getFullName() + " [ID=" + toCustomer.getId() + "]."+ " Account's Current Balance: $" + String.format("%.2f", fromAccount.getBalance()));
+                            }
                             break;
                         case "transfers":
                             rc = fromCustomer.transfer(fromAccount, toAccount, amount);
-                            if (!rc) fh.appendLog("EPMB_Error_Log", fromCustomer.getFullName() + " [id=" + fromCustomer.getId() + "]"+  " attempted to transfer invalidly.");
+                            if (!rc) fh.appendLog("EPMB_Error_Log", fromCustomer.getFullName() + " [ID=" + fromCustomer.getId() + "]"+  " attempted to transfer invalidly.");
+                            else {
+                                assert toAccount != null;
+                                fh.appendLog("EPMB_Transactions", fromCustomer.getFullName() + " [ID:" + fromCustomer.getId() + "] transferred funds from " + fromAccount.getType() + " [ID=" + fromAccount.getAccountNumber() +"] to " + toAccount.getType()+ " [ID=" + toAccount.getAccountNumber() +"]" + "Account's Current Balance: $" + String.format("%.2f", fromAccount.getBalance()));
+                            }
                             break;
                         case "inquires":
                             fromCustomer.viewAccount(fromAccount, true);
+                            fh.appendLog("EPMB_Transactions", fromCustomer.getFullName() + " [ID:" + fromCustomer.getId() + "] inquired the details of " + fromAccount.getType() + " [ID=" + fromAccount.getAccountNumber() +"]");
                             break;
                         case "withdraws":
                             rc = fromCustomer.withdraw(fromAccount, amount);
-                            if (!rc) fh.appendLog("EPMB_Error_Log", fromCustomer.getFullName()+ " [id=" + fromCustomer.getId() + "]" + " attempted to withdraw funds.");
+                            if (!rc) fh.appendLog("EPMB_Error_Log", fromCustomer.getFullName()+ " [ID=" + fromCustomer.getId() + "]" + " attempted to withdraw funds.");
+                            else fh.appendLog("EPMB_Transactions", fromCustomer.getFullName() + " [ID:" + fromCustomer.getId() + "] withdrew $" + String.format("%2f", amount) + " from " + fromAccount.getType() + " [ID=" + fromAccount.getAccountNumber() +"]");
                             break;
                         case "deposits":
                             rc = fromCustomer.deposit(toAccount, amount);
-                            if (!rc) fh.appendLog("EPMB_Error_Log", fromCustomer.getFullName()+ " [id=" + fromCustomer.getId() + "]" + " attempted to deposit funds.");
+                            if (!rc) fh.appendLog("EPMB_Error_Log", fromCustomer.getFullName()+ " [ID=" + fromCustomer.getId() + "]" + " attempted to deposit funds.");
+                            else {
+                                assert toAccount != null;
+                                fh.appendLog("EPMB_Transactions", fromCustomer.getFullName() + " [ID:" + fromCustomer.getId() + "] deposited $" + String.format("%2f", amount) + " to " + toAccount.getType() + " [ID=" + toAccount.getAccountNumber() +"]");
+                            }
                             break;
                         default:
                             System.out.println("Invalid action: " + action);

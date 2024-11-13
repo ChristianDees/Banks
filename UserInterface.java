@@ -189,7 +189,11 @@ public abstract class UserInterface {
                         filename+=account.getType()+type+".txt";
                         rc = fh.generateUserTransactionsFile(filename, customer, account, startDate, endDate);
                     }
-                    if (rc) System.out.println("\n* * * Successfully exported transactions to " + filename + " * * *\n");
+
+                    if (rc){
+                        fh.appendLog("EPMB_Transactions","Generated " + filename + " for " + customer.getFullName()+" [ID:" + customer.getId() + "]");
+                        System.out.println("\n* * * Successfully exported transactions to " + filename + " * * *\n");
+                    }
                     break;
                 } catch (ParseException e) {
                     out.println("Incorrect date format, please try again.");

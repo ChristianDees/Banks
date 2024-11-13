@@ -27,7 +27,7 @@ public class ManagerInterface extends UserInterface{
             out.print("A. Inquire accounts by customer name.\nB. Inquire account by type/number.\nC. Perform transaction from file.\nD. Generate Bank Statement for Customer's Account. \nE. Generate Bank Statement for all Customer Accounts.\n> ");
             String input = scan.nextLine().trim().toLowerCase();
             if (logout(input)) return;
-            Manager manager = new Manager("fake", "fake");
+            Manager manager = new Manager("Admin", "Admin");
             switch (input) {
                 case "a":
                     getUserName(scan, true, true, fh);

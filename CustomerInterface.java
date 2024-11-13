@@ -47,10 +47,10 @@ public class CustomerInterface extends UserInterface{
                                     transaction.twoAccountTransaction(scan, customer, null, false, fh);
                                     break;
                                 case "c":
-                                    this.getTimeRange(scan, customer, fh, false, "UserTransactions", "Transactions");
+                                    getTimeRange(scan, customer, fh, false, "UserTransactions", "Transactions");
                                     break;
                                 case "d":
-                                    this.getTimeRange(scan, customer, fh, true, "UserTransactions", "Transactions");
+                                    getTimeRange(scan, customer, fh, true, "UserTransactions", "Transactions");
                                     break;
                                 default:
                                     // error logging
@@ -147,7 +147,11 @@ public class CustomerInterface extends UserInterface{
         recordFormatted.add(String.valueOf(100 + new Random().nextInt(25000 - 100 + 1)));         // credit max
         Dictionary<String, String> recordDict = fh.recordToDictionary(recordFormatted.toArray(new String[0]), defaultHeaders);
         boolean rc = BankDatabase.getInstance().addCustomer(recordDict);
-        if (rc) out.println("\n* * * Successfully added new customer. * * *\n");
+        if (rc){
+            Customer newCustomer = BankDatabase.getInstance().getCustomers().get(recordFormatted.get(1)+recordFormatted.get(2));
+            fh.appendLog("EPMB_Transactions", "New customer added: " + newCustomer.getFullName() + " [ID:" + newCustomer.getId() + "]");
+            out.println("\n* * * Successfully added new customer. * * *\n");
+        }
         else out.println("\n* * * Failed to add new customer. * * *\n");
     }
 }
