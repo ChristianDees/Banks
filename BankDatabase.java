@@ -156,7 +156,7 @@ public class BankDatabase {
      * @return          true if success/false if failed.
      */
     boolean addCustomer(Dictionary<String, String> record) {
-        String[] headers = {"Identification Number", "First Name", "Last Name", "Date of Birth", "Address", "Phone Number", "Checking Account Number", "Checking Starting Balance", "Savings Account Number", "Savings Starting Balance", "Credit Account Number", "Credit Max", "Credit Starting Balance"};
+        String[] headers = {"Identification Number", "First Name", "Last Name", "Date of Birth", "Address", "Phone Number", "Checking Account Number", "Checking Starting Balance", "Savings Account Number", "Savings Starting Balance", "Credit Account Number", "Credit Max", "Credit Starting Balance", "Password"};
         int idNum = Integer.parseInt(record.get(headers[0]));
         String firstName = record.get(headers[1]).toLowerCase();
         String lastName = record.get(headers[2]).toLowerCase();
@@ -170,6 +170,7 @@ public class BankDatabase {
         int creditAccNum = Integer.parseInt(record.get(headers[10]));
         int creditMax = Integer.parseInt(record.get(headers[11]));
         double creditStartBalance = Double.parseDouble(record.get(headers[12]));
+        String password = (record.get(headers[13]) != null) ? record.get(headers[13]) : "";
         /*
             FUTURE: REMOVE THIS BECAUSE DUMB
          */
@@ -184,7 +185,7 @@ public class BankDatabase {
         if(!rc){
             fh.appendLog("EPMB_Error_Log", "Failed to add user with id: " + idNum + ". Reason: User with that id already exists.");
         } else {
-            Customer newCustomer = new Customer(idNum, firstName, lastName, dob, address, phoneNum);
+            Customer newCustomer = new Customer(idNum, firstName, lastName, dob, address, phoneNum, password);
             Checking checkingAcc = new Checking(checkingAccNum, checkingStartBalance);
             Savings savingsAcc = new Savings(savingsAccNum, savingsStartBalance);
             Credit creditAcc = new Credit(creditAccNum, creditStartBalance, creditMax);

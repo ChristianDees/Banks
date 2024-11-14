@@ -56,14 +56,15 @@ public abstract class UserInterface {
     /**
      * Handle a transaction with one account.
      *
-     * @param scan          The scanner object to continue taking input.
-     * @param viewAccounts  Flag to show accounts.
-     * @param viewBalance   Flag to show balance.
-     * @param fh            File handler object to read/write to files
+     * @param scan           The scanner object to continue taking input.
+     * @param promptPassword Flag to prompt user for password.
+     * @param viewAccounts   Flag to show accounts.
+     * @param viewBalance    Flag to show balance.
+     * @param fh             File handler object to read/write to files
      *
-     * @return              Customer based on the username given.
+     * @return               Customer based on the username given.
      */
-    public Customer getUserName(Scanner scan, boolean viewAccounts, boolean viewBalance, FileHandler fh) {
+    public Customer getUserName(Scanner scan, boolean promptPassword, boolean viewAccounts, boolean viewBalance, FileHandler fh) {
         // three attempts
         for (int attempts = 0; attempts < 3; attempts++) {
             if(leave())return null;
@@ -75,20 +76,24 @@ public abstract class UserInterface {
             if (logout(lastName)) return null;
             if (firstName.isEmpty() || lastName.isEmpty()) {
                 // error logging
-                fh.appendLog("EPMB_Error_Log", "Attempted to ask for user's name. Reason for failure: Invalid format of id, name.");
+                fh.appendLog("EPMB_Error_Log", "Attempted to ask for user's name. Reason for failure: Invalid format of name.");
                 if (attempts < 2)
-                    out.println("Invalid format. Use 'first last'.");
+                    out.println("Invalid format.");
                 continue;
             }
             String formattedName = firstName+lastName;
             if (!logout(formattedName)){
                 Dictionary<String, Customer> customers = BankDatabase.getInstance().getCustomers();
                 Customer customer = customers.get(formattedName);
-                if (customer != null){
-                    if (viewAccounts)
-                        // print accounts if given
-                        customer.viewAccounts(viewBalance);
-                    return customer;
+                if (customer != null) {
+                    boolean rc = true;
+                    if (promptPassword) rc = this.requestPassword(customer, scan);
+                    if (rc) {
+                        if (viewAccounts)
+                            // print accounts if given
+                            customer.viewAccounts(viewBalance);
+                        return customer;
+                    } else continue;
                 }
                 // error logging
                 fh.appendLog("EPMB_Error_Log", "Attempted to ask for user's name. Reason for failure: Attempted to get nonexistent customer.");
@@ -163,6 +168,10 @@ public abstract class UserInterface {
     public void getTimeRange(Scanner scan, Customer customer, FileHandler fh, boolean allTransactions, String dir, String type){
         // get the date from start and end
         Account account = null;
+        if (customer == null){
+            out.println("Customer does not exist. Returning...");
+            return;
+        }
         if (!allTransactions) account = getAccountForTransaction(scan, customer, fh);
         for (int i = 0; i < 3; i++){
             if (account == null && !allTransactions)return;
@@ -206,5 +215,107 @@ public abstract class UserInterface {
         }
     }
 
+    /**
+     * Give a prompt to user and match input to regex to ensure its proper format.
+     *
+     * @param scan      object scanner to allow for user input.
+     * @param prompt    string question to ask.
+     * @param regex     pattern of which the input should match.
+     * @param fh        file handler object to log to files.
+     * @return          input once in correct form.
+     */
+    private String requestCustomerInfo(Scanner scan, String prompt, String regex, FileHandler fh) {
+        String input;
+        int attempts = 0;
+        while (attempts < 3) {
+            out.print(prompt);
+            input = scan.nextLine().trim();
+            if (input.matches(regex)) {
+                return input;
+            }
+            attempts++;
+            fh.appendLog("EPMB_Error_Log", "Failed to input correct format: " + input);
+            if (attempts < 3)out.println("Invalid input. Please try again.");
+        }
+        out.println("Maximum attempts reached, returning to main...");
+        return null;
+    }
+
+    /**
+     * Handles the asking of users each required information prompt.
+     *
+     * @param scan  scanner object to allow for user input.
+     * @param fh    file handler object to log to files when needed.
+     */
+    public void handleNewCustomer(Scanner scan, FileHandler fh) {
+        String[] defaultHeaders = {"Identification Number", "First Name", "Last Name", "Date of Birth", "Address", "Phone Number", "Checking Account Number", "Checking Starting Balance", "Savings Account Number", "Savings Starting Balance", "Credit Account Number", "Credit Starting Balance", "Credit Max", "Password"};
+        out.println("Please fill out the following information:");
+        String[][] prompts = {
+                {"First Name: ", "[a-zA-Z]+"},
+                {"Last Name: ", "[a-zA-Z]+"},
+                {"Date of Birth (day-Mon-yy, e.g., '7-Feb-71'): ", "\\d{1,2}-[a-zA-Z]{3}-\\d{2}"},
+                {"Address: ", ".+"},
+                {"City: ", "[a-zA-Z ]+"},
+                {"State (two-letter state code, e.g., 'TX'): ", "[A-Z]{2}"},
+                {"Zip Code: ", "\\d{5}"},
+                {"Phone Number: ", "\\d{10}"},
+                {"Create a password with the following requirements:\n1. Minimum Length of 8 characters.\n2. Must include at least one uppercase letter.\n3. Must include at least one lowercase letter.\n4. Must include at least one digit.\n5. Must include at least one special character (e.g., !, @, #, $)\nNew Password: ", "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*(),.?\":{}|<>])[A-Za-z\\d!@#$%^&*(),.?\":{}|<>]{8,}$"},
+                {"Confirm Password: ", "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*(),.?\":{}|<>])[A-Za-z\\d!@#$%^&*(),.?\":{}|<>]{8,}$"}
+        };
+        List<String> recordFormatted = new ArrayList<>();
+        String[] record = new String[prompts.length + 1]; // +1 for the customer ID
+        TreeSet<Integer> customerIDs = BankDatabase.getInstance().getCustomerIDs();
+        record[0] = String.valueOf(customerIDs.last() + 1);
+        for (int i = 0; i < prompts.length; i++) {
+            record[i + 1] = requestCustomerInfo(scan, prompts[i][0], prompts[i][1], fh);
+            if (record[i + 1] == null)return;
+        }
+        String formattedAddress = String.format("%s, %s, %s %s",
+                (record[4].toLowerCase()),                // address
+                (record[5].toLowerCase()),                // city
+                record[6].toUpperCase(),    // state
+                record[7].toLowerCase()                   // zip
+        );
+        // if everything checks out THEN add a new id
+        recordFormatted.add(record[0].toLowerCase());                                                                     // id
+        recordFormatted.add(record[1].toLowerCase());                                                                     // first name
+        recordFormatted.add(record[2].toLowerCase());                                                                     // last name
+        recordFormatted.add(record[3].toLowerCase());                                                                     // dob
+        recordFormatted.add(formattedAddress);                                                              // address
+        recordFormatted.add(record[8].toLowerCase());                                                                     // phone number
+        recordFormatted.add(String.valueOf(BankDatabase.getInstance().getCheckingAccNums().last() + 1)); // checking account number
+        recordFormatted.add(String.valueOf(0));                                                          // checking current balance
+        recordFormatted.add(String.valueOf(BankDatabase.getInstance().getSavingsAccNums().last() + 1));  // savings account number
+        recordFormatted.add(String.valueOf(0));                                                          // savings current balance
+        recordFormatted.add(String.valueOf(BankDatabase.getInstance().getCreditAccNums().last() + 1));   // credit account number
+        recordFormatted.add(String.valueOf(0));                                                          // credit current balance
+        recordFormatted.add(String.valueOf(100 + new Random().nextInt(25000 - 100 + 1)));         // credit max
+        if (!record[9].equals(record[10])){
+            out.println("Passwords do not match.");
+            out.println("\n* * * Failed to add new customer. * * *\n");
+            return;
+        }
+        recordFormatted.add(record[9]);                                                                    // password
+        Dictionary<String, String> recordDict = fh.recordToDictionary(recordFormatted.toArray(new String[0]), defaultHeaders);
+        boolean rc = BankDatabase.getInstance().addCustomer(recordDict);
+        if (rc){
+            Customer newCustomer = BankDatabase.getInstance().getCustomers().get(recordFormatted.get(1)+recordFormatted.get(2));
+            fh.appendLog("EPMB_Transactions", "New customer added: " + newCustomer.getFullName() + " [ID:" + newCustomer.getId() + "]");
+            out.println("\n* * * Successfully added new customer. * * *\n");
+        }
+        else out.println("\n* * * Failed to add new customer. * * *\n");
+    }
+
+    private boolean requestPassword(Customer customer, Scanner scan){
+        String inp;
+        for (int i = 0; i < 3; i++){
+            out.print("Password: ");
+            inp = scan.nextLine();
+            if (customer.verifyPassword(inp)) return true;
+            out.println("Incorrect password. Please try again.");
+        }
+        out.println("Too many failed attempts. Returning...");
+        return false;
+    }
 }
 

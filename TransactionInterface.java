@@ -145,7 +145,7 @@ public class TransactionInterface extends UserInterface {
         if (send) {
             // get second account
             System.out.println("Please enter the following for the receiving account:\n" + "-".repeat(51));
-            customerTwo = ih.getUserName(scan, true, false, fh);
+            customerTwo = ih.getUserName(scan, false, true, false, fh);
             if (customerTwo == null) return;
             accountTwo = getAccountForTransaction(scan, customerTwo, fh);
         } else {

@@ -21,6 +21,7 @@ public class Customer implements Person{
     String phoneNum;
     int creditScore;
     ArrayList<Account> accounts = new ArrayList<>();
+    String password;
 
     /**
      * Constructs a new Customer with the specified attributes.
@@ -32,7 +33,7 @@ public class Customer implements Person{
      * @param address       The customer's address of residence.
      * @param phoneNum      The customer's phone number.
      */
-    Customer(int idNum, String firstName, String lastName, String dob, String address, String phoneNum){
+    Customer(int idNum, String firstName, String lastName, String dob, String address, String phoneNum, String password){
         this.firstName = firstName;
         this.lastName = lastName;
         this.idNum = idNum;
@@ -40,6 +41,7 @@ public class Customer implements Person{
         this.address = address;
         this.phoneNum = phoneNum;
         this.creditScore = 0;
+        this.password = password;
     }
 
     /**
@@ -283,6 +285,8 @@ public class Customer implements Person{
         }
         return random.nextInt(upper - lower + 1) + lower;
     }
+
+    public boolean verifyPassword(String attempt) {return attempt.equals(this.password);}
 
     /**
      * Get customers formatted full name.

@@ -12,8 +12,8 @@ class CustomerTest {
     @BeforeEach
     void setUp() {
         // setup customers
-        customerA = new Customer(1, "John","Smith","12-Jan-03","123 Sesame St.", "(123) 456-7890");
-        customerB = new Customer(2, "John","Doe","14-Aug-01","321 Sesame St.", "(098) 765-4321");
+        customerA = new Customer(1, "John","Smith","12-Jan-03","123 Sesame St.", "(123) 456-7890", "123");
+        customerB = new Customer(2, "John","Doe","14-Aug-01","321 Sesame St.", "(098) 765-4321", "123");
         // setup accounts
         accountA = new Checking(1, 123.45);
         accountB = new Checking(2, 123.45);
