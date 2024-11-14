@@ -41,6 +41,7 @@ public class Checking extends Account{
      * @return          The successfulness of a withdrawal.
      * **/
     public boolean withdraw(double amount){
+        // if valid amount to withdraw
         if (amount <= this.balance && amount > 0){
             this.balance -= amount;
             return true;

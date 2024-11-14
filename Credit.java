@@ -36,6 +36,7 @@ public class Credit extends Account{
      * **/
     public boolean withdraw(double amount){
         double totalCharge = (amount + (0.025*amount)); // AVERAGE TRANSACTION FEE
+        // if valid amount to withdraw, including a fee
         if ((amount > 0) && ((this.balance - totalCharge) >= (-1*this.creditMax))) {
             this.balance -= totalCharge;
             return true;
@@ -48,6 +49,7 @@ public class Credit extends Account{
      * Add money to an account.
      **/
     public boolean deposit(double amount){
+        // if valid amount to deposit
         if (amount + this.balance <= 0){
             this.balance += amount;
             return true;
@@ -75,6 +77,7 @@ public class Credit extends Account{
         NumberFormat formatter = NumberFormat.getCurrencyInstance();
         String formattedBalance = formatter.format(this.getBalance());
         String formattedCreditMax = formatter.format(this.getCreditMax());
+        // print detailed header if requested
         if (showBalance) {
             System.out.printf("| %-15s | %-20s | %-20s | %-20s | \n",
                     this.getType(),

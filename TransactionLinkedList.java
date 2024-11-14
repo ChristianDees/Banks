@@ -66,11 +66,15 @@ public class TransactionLinkedList {
     public List<TransactionNode> getTransactionsBetweenDates(String startDate, String endDate) throws ParseException {
         List<TransactionNode> result = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy");
+        // get start object to compare
         java.util.Date start = sdf.parse(startDate);
+        // get end object to compare
         java.util.Date end = sdf.parse(endDate);
         TransactionNode current = head;
+        // keep going until end
         while (current != null) {
             java.util.Date transactionDate = sdf.parse(current.date);
+            // if dates match, or its after start or before end, add it to the list
             if ((transactionDate.equals(start) || transactionDate.after(start)) &&
                     (transactionDate.equals(end) || transactionDate.before(end))) {
                 result.add(current);

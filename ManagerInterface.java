@@ -30,25 +30,33 @@ public class ManagerInterface extends UserInterface{
             Manager manager = new Manager("Admin", "Admin");
             switch (input) {
                 case "a":
+                    // inquire and view accounts based on username, not requiring password login
                     getUserName(scan, false, true, true, fh);
                     break;
                 case "b":
+                    // inquire and view accounts based on type and number of account
                     inquireByAccount(scan, fh);
                     break;
                 case "c":
+                    // get filename from user
                     System.out.print("Enter the filename:\n> ");
                     String filename = scan.nextLine().trim().toLowerCase();
                     manager.transactFromFile(filename);
                     break;
                 case "d":
+                    // get customer based on username
                     Customer customerOneTrans = getUserName(scan, false, false,false, fh);
+                    // get the time range to generate bank statement
                     getTimeRange(scan, customerOneTrans, fh, false, "BankStatements", "Statement");
                     break;
                 case "e":
+                    // get customer based on username
                     Customer customerAllTrans = getUserName(scan, false, false, false, fh);
+                    // get the time range to generate bank statement
                     getTimeRange(scan, customerAllTrans, fh, true, "BankStatements", "Statement");
                     break;
                 case "f":
+                    // inquire customer to enter fields for their new account
                     handleNewCustomer(scan, fh);
                     break;
                 default:

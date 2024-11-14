@@ -101,17 +101,21 @@ public class TransactionInterface extends UserInterface {
             if (logout(input)) return;
             switch (input) {
                 case "a":
+                    // inquire detailed description of account
                     fh.appendLog("EPMB_Transactions", customer.getFullName() + " [ID:" + customer.getId() + "] viewed the details of " + account.getType() + " account [Account Number:" + account.getAccountNumber() +
                             "] Account's Current Balance: $" + String.format("%.2f", account.getBalance()));
                     account.printAccount(true, true);
                     return;
                 case "b":
+                    // perform depositing of funds
                     depositAmount(scan, customer, account, fh);
                     return;
                 case "c":
+                    // perform withdrawing of funds
                     withdrawAmount(scan, customer, account, fh);
                     return;
                 case "d":
+                    // handle transaction between two entities
                     twoAccountTransaction(scan, customer, account, true, fh);
                     return;
                 default:
@@ -153,11 +157,8 @@ public class TransactionInterface extends UserInterface {
         }
         if (accountTwo == null) return;
         // perform transfer/send
-        if (transfer) {
-            this.transferAmount(scan, customerOne, accountOne, accountTwo, fh);
-        } else {
-            this.sendAmount(scan, customerOne, accountOne, customerTwo, accountTwo, fh);
-        }
+        if (transfer) this.transferAmount(scan, customerOne, accountOne, accountTwo, fh);
+        else this.sendAmount(scan, customerOne, accountOne, customerTwo, accountTwo, fh);
         }
 
     /**
@@ -183,12 +184,9 @@ public class TransactionInterface extends UserInterface {
                         "] to " + accountTwo.getType() + " account [Account Number:" + accountTwo.getAccountNumber() + "]. " +
                         "Account One Current Balance: $" + String.format("%.2f", accountOne.getBalance()) +
                         " Account Two Current Balance: $" + String.format("%.2f", accountTwo.getBalance());
-                if (rc) {
-                    fh.appendLog("EPMB_Transactions", logMessage);
-                } else {
-                    // error logging
+                if (rc) fh.appendLog("EPMB_Transactions", logMessage);
+                else // error logging
                     fh.appendLog("EPMB_Error_Log", logMessage + " Reason for failure: Insufficient funds or incorrect account.");
-                }
                 return;
             } else {
                 // error logging
@@ -264,8 +262,7 @@ public class TransactionInterface extends UserInterface {
      */
     private double validateMoney(String input) {
         boolean correctFormat = Pattern.matches("^(\\d{1,3}(,\\d{3})*(\\.\\d{1,2})?|\\d+(\\.\\d{1,2})?)$", input);
-        if (correctFormat)
-            return Double.parseDouble(input.replace(",", ""));
+        if (correctFormat) return Double.parseDouble(input.replace(",", ""));
         return -1;
     }
 

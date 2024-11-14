@@ -26,13 +26,16 @@ public class CustomerInterface extends UserInterface{
         for (int i = 0; i < 3; i++){
             out.print("Are you an existing customer, or a new one?\nA. Existing customer\nB. New customer\n> ");
             String input = scan.nextLine().trim().toLowerCase();
+            // check if logout request
             if (logout(input)) return;
             switch (input){
                 case "a":
+                    // get user's name, then handle that user
                     Customer customer = this.getUserName(scan, true,false, false, fh);
                     handleExistingCustomer(customer, scan, fh);
                     return;
                 case "b":
+                    // request user to set up their account
                     handleNewCustomer(scan, fh);
                     return;
                 default:
@@ -62,15 +65,19 @@ public class CustomerInterface extends UserInterface{
                 TransactionInterface transaction = new TransactionInterface();
                 switch (input) {
                     case "a":
+                        // single transactions
                         transaction.oneAccountTransaction(scan, customer, fh);
                         break;
                     case "b":
+                        // two people transaction
                         transaction.twoAccountTransaction(scan, customer, null, false, fh);
                         break;
                     case "c":
+                        // generate transactions file
                         getTimeRange(scan, customer, fh, false, "UserTransactions", "Transactions");
                         break;
                     case "d":
+                        // generate transactions file
                         getTimeRange(scan, customer, fh, true, "UserTransactions", "Transactions");
                         break;
                     default:

@@ -20,34 +20,42 @@ public class BankDatabase {
      * One instance of database.
      */
     private static BankDatabase instance;
+
     /**
      * Customer name: Customer object
      */
     public static  Dictionary<String, Customer> customers = new Hashtable<>();
+
     /**
      * Checking account id number: Checking account object
      */
     public static  Dictionary<Integer, Checking> checkingAccounts = new Hashtable<>();
+
     /**
      * Saving account id number: Saving account object
      */
     public static  Dictionary<Integer, Savings> savingAccounts = new Hashtable<>();
+
     /**
      * Credit account id number: Credit account object
      */
     public static final Dictionary<Integer, Credit> creditAccounts = new Hashtable<>();
+
     /**
      * In order of customer IDs
      */
     public static  TreeSet<Integer> customerIDs = new TreeSet<>();
+
     /**
      * In order of checking account numbers
      */
     public static final TreeSet<Integer> checkingAccNums = new TreeSet<>();
+
     /**
      * In order of saving account numbers
      */
     public static final TreeSet<Integer> savingsAccNums = new TreeSet<>();
+
     /**
      * In order of credit account numbers
      */
@@ -156,7 +164,9 @@ public class BankDatabase {
      * @return          true if success/false if failed.
      */
     boolean addCustomer(Dictionary<String, String> record) {
+        // default headers to add a customer's values
         String[] headers = {"Identification Number", "First Name", "Last Name", "Date of Birth", "Address", "Phone Number", "Checking Account Number", "Checking Starting Balance", "Savings Account Number", "Savings Starting Balance", "Credit Account Number", "Credit Max", "Credit Starting Balance", "Password"};
+        // obtain all customer's values
         int idNum = Integer.parseInt(record.get(headers[0]));
         String firstName = record.get(headers[1]).toLowerCase();
         String lastName = record.get(headers[2]).toLowerCase();
@@ -171,9 +181,7 @@ public class BankDatabase {
         int creditMax = Integer.parseInt(record.get(headers[11]));
         double creditStartBalance = Double.parseDouble(record.get(headers[12]));
         String password = (record.get(headers[13]) != null) ? record.get(headers[13]) : "";
-        /*
-            FUTURE: REMOVE THIS BECAUSE DUMB
-         */
+        // each record is based on customer's name (assuming unique names)
         FileHandler fh = new FileHandler();
         if (customers.get(firstName+lastName)!=null){
             System.out.println("-----A Customer with that name already exists!-----");
@@ -182,9 +190,10 @@ public class BankDatabase {
         }
         // add customer and its accounts
         boolean rc = customerIDs.add(idNum);
-        if(!rc){
-            fh.appendLog("EPMB_Error_Log", "Failed to add user with id: " + idNum + ". Reason: User with that id already exists.");
-        } else {
+        // exit if customer already exists
+        if(!rc) fh.appendLog("EPMB_Error_Log", "Failed to add user with id: " + idNum + ". Reason: User with that id already exists.");
+        else {
+            // create and add customer's new bank accounts
             Customer newCustomer = new Customer(idNum, firstName, lastName, dob, address, phoneNum, password);
             Account checkingAcc = AccountFactory.getAccount("checking", checkingAccNum, checkingStartBalance, 0);
             Account savingsAcc = AccountFactory.getAccount("savings", savingsAccNum, savingsStartBalance, 0);

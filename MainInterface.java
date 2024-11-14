@@ -36,14 +36,17 @@ public class MainInterface extends UserInterface{
         String role = scan.nextLine().trim().toLowerCase();
         switch (role) {
             case "customer":
+                // enact customer interface
                 CustomerInterface ci = new CustomerInterface();
                 ci.handleCustomer(scan, fh);
                 break;
             case "manager":
+                // enact manager interface
                 ManagerInterface mi = new ManagerInterface();
                 mi.handleManager(scan, fh);
                 break;
             case "exit":
+                // leave if requested
                 exit = true;
                 break;
             default:
@@ -58,6 +61,7 @@ public class MainInterface extends UserInterface{
      */
     public void mainMenu(){
         Scanner scan = new Scanner(System.in);
+        // stay on unless requested to leave
         while (!exit)
             getUserRole(scan);
         out.println("Exiting...");

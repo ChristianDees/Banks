@@ -17,8 +17,20 @@ import java.time.format.DateTimeFormatter;
  * Represents an Account with its unique account number and current balance
  */
 public abstract class Account {
+
+    /**
+     * Account number
+     */
     int accNum;
+
+    /**
+     * Account current balance.
+     */
     double balance;
+
+    /**
+     * Transactions associated with this account.
+     */
     TransactionLinkedList transactionList;
 
     /**
@@ -96,14 +108,10 @@ public abstract class Account {
      **/
     public void printAccount(boolean showBalance, boolean printHeader) {
         if (printHeader) this.printHeader(showBalance);
-
         NumberFormat formatter = NumberFormat.getCurrencyInstance();
-        // Ensure we have a consistent width for currency formatting.
+        // format the balance
         String formattedBalance = formatter.format(this.getBalance());
-
-
-        // print the balance and other attributes
-
+        // print balance
         if (showBalance) {
             System.out.printf("| %-15s | %-20s | %-20s | %-20s | \n",
                     this.getType(),
@@ -126,12 +134,12 @@ public abstract class Account {
      */
     public void printHeader(boolean showBalance){
         if (showBalance) {
-            // Full header with adjusted column widths
+            // print detailed header of account
             System.out.println("+-----------------+----------------------+----------------------+----------------------+");
             System.out.printf("| %-15s | %-20s | %-20s | %-20s | \n", "Type", "Account Number", "Balance", "Limit");
             System.out.println("+-----------------+----------------------+----------------------+----------------------+");
         } else {
-            // Partial header for when balance and limit are not shown
+            // print non-detailed header
             System.out.println("+-----------------+----------------------+");
             System.out.printf("| %-15s | %-20s |\n", "Type", "Account Number");
             System.out.println("+-----------------+----------------------+");

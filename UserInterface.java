@@ -26,6 +26,7 @@ public abstract class UserInterface {
      * Displays a welcome message to the user
      */
     public void displayWelcomeMessage(){
+        // default display message
         String message = "El Paso Miner's Bank";
         int length = message.length();
         out.println("+" + "-".repeat(length + 2) + "+");
@@ -83,10 +84,12 @@ public abstract class UserInterface {
             }
             String formattedName = firstName+lastName;
             if (!logout(formattedName)){
+                // get customer object based on username
                 Dictionary<String, Customer> customers = BankDatabase.getInstance().getCustomers();
                 Customer customer = customers.get(formattedName);
                 if (customer != null) {
                     boolean rc = true;
+                    // require password to login if customer, not for manager
                     if (promptPassword) rc = this.requestPassword(customer, scan);
                     if (rc) {
                         if (viewAccounts)
@@ -127,11 +130,13 @@ public abstract class UserInterface {
             }
             String accType = parts[0].trim();
             try {
+                // get account number
                 int accNum = Integer.parseInt(parts[1].trim());
                 TransactionInterface th = new TransactionInterface();
                 Account account = th.getAccount(accType, accNum);
                 if (account != null) {
                     ArrayList<Account> accounts = customer.accounts;
+                    // if account exists within database
                     if (accounts.contains(account)) {
                         // access account
                         fh.appendLog("EPMB_Transactions", customer.getFullName() + " [ID:" + customer.getId() + "] accessed account " + account.getType() + " " + "[Account Number:" + account.getAccountNumber() + "]");
@@ -175,30 +180,36 @@ public abstract class UserInterface {
         if (!allTransactions) account = getAccountForTransaction(scan, customer, fh);
         for (int i = 0; i < 3; i++){
             if (account == null && !allTransactions)return;
+            // ask for time range
             out.print("Enter date range (comma separated, mm-dd-yyyy format)\n> ");
             String input = scan.nextLine().trim().toLowerCase();
             if (logout(input)) return;
             String[] dates = input.split(",");
+            // continue if valid format
             if (dates.length == 2) {
                 String startDate = dates[0].trim();
                 String endDate = dates[1].trim();
                 SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy");
                 sdf.setLenient(false);
                 try {
+                    // get start and end date objects
                     sdf.parse(startDate);
                     sdf.parse(endDate);
+                    // create filename
                     String filename = dir+"/"+customer.getFullName().replace(" ", "");
                     boolean rc = false;
                     if (allTransactions){
                         filename+=type+".txt";
+                        // add every account to file
                         for (Account account1: customer.getAccounts())
                             rc = fh.generateUserTransactionsFile(filename,customer, account1, startDate, endDate);
                     }
                     else{
+                        // only add specific account to file
                         filename+=account.getType()+type+".txt";
                         rc = fh.generateUserTransactionsFile(filename, customer, account, startDate, endDate);
                     }
-
+                    // check if successful
                     if (rc){
                         fh.appendLog("EPMB_Transactions","Generated " + filename + " for " + customer.getFullName()+" [ID:" + customer.getId() + "]");
                         System.out.println("\n* * * Successfully exported transactions to " + filename + " * * *\n");
@@ -227,9 +238,11 @@ public abstract class UserInterface {
     private String requestCustomerInfo(Scanner scan, String prompt, String regex, FileHandler fh) {
         String input;
         int attempts = 0;
+        // 3 attempts
         while (attempts < 3) {
             out.print(prompt);
             input = scan.nextLine().trim();
+            // check if their input matches the correct format
             if (input.matches(regex)) {
                 return input;
             }
@@ -250,6 +263,7 @@ public abstract class UserInterface {
     public void handleNewCustomer(Scanner scan, FileHandler fh) {
         String[] defaultHeaders = {"Identification Number", "First Name", "Last Name", "Date of Birth", "Address", "Phone Number", "Checking Account Number", "Checking Starting Balance", "Savings Account Number", "Savings Starting Balance", "Credit Account Number", "Credit Starting Balance", "Credit Max", "Password"};
         out.println("Please fill out the following information:");
+        // new customer fields + required formats
         String[][] prompts = {
                 {"First Name: ", "[a-zA-Z]+"},
                 {"Last Name: ", "[a-zA-Z]+"},
@@ -265,24 +279,25 @@ public abstract class UserInterface {
         List<String> recordFormatted = new ArrayList<>();
         String[] record = new String[prompts.length + 1]; // +1 for the customer ID
         TreeSet<Integer> customerIDs = BankDatabase.getInstance().getCustomerIDs();
+        // assign prompted answers to list
         record[0] = String.valueOf(customerIDs.last() + 1);
         for (int i = 0; i < prompts.length; i++) {
             record[i + 1] = requestCustomerInfo(scan, prompts[i][0], prompts[i][1], fh);
             if (record[i + 1] == null)return;
         }
         String formattedAddress = String.format("%s, %s, %s %s",
-                (record[4].toLowerCase()),                // address
-                (record[5].toLowerCase()),                // city
-                record[6].toUpperCase(),    // state
-                record[7].toLowerCase()                   // zip
+                (record[4].toLowerCase()),                                                                  // address
+                (record[5].toLowerCase()),                                                                  // city
+                record[6].toUpperCase(),                                                                    // state
+                record[7].toLowerCase()                                                                     // zip
         );
         // if everything checks out THEN add a new id
-        recordFormatted.add(record[0].toLowerCase());                                                                     // id
-        recordFormatted.add(record[1].toLowerCase());                                                                     // first name
-        recordFormatted.add(record[2].toLowerCase());                                                                     // last name
-        recordFormatted.add(record[3].toLowerCase());                                                                     // dob
+        recordFormatted.add(record[0].toLowerCase());                                                       // id
+        recordFormatted.add(record[1].toLowerCase());                                                       // first name
+        recordFormatted.add(record[2].toLowerCase());                                                       // last name
+        recordFormatted.add(record[3].toLowerCase());                                                       // dob
         recordFormatted.add(formattedAddress);                                                              // address
-        recordFormatted.add(record[8].toLowerCase());                                                                     // phone number
+        recordFormatted.add(record[8].toLowerCase());                                                       // phone number
         recordFormatted.add(String.valueOf(BankDatabase.getInstance().getCheckingAccNums().last() + 1)); // checking account number
         recordFormatted.add(String.valueOf(0));                                                          // checking current balance
         recordFormatted.add(String.valueOf(BankDatabase.getInstance().getSavingsAccNums().last() + 1));  // savings account number
@@ -316,8 +331,10 @@ public abstract class UserInterface {
     private boolean requestPassword(Customer customer, Scanner scan){
         String inp;
         for (int i = 0; i < 3; i++){
+            // request user to enter password
             out.print("Password: ");
             inp = scan.nextLine();
+            // return success if password is correct
             if (customer.verifyPassword(inp)) return true;
             out.println("Incorrect password. Please try again.");
         }

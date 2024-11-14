@@ -14,6 +14,7 @@ public class AccountFactory {
      */
     public static Account getAccount(String accountType, int accNum, double startBalance, int limit){
         accountType = accountType.toLowerCase().trim();
+        // return account type based on requested string of account type
         return switch (accountType) {
             case "checking" -> new Checking(accNum, startBalance);
             case "savings" -> new Savings(accNum, startBalance);

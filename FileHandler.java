@@ -26,6 +26,7 @@ public class FileHandler {
      * @param filename the filename.
      */
     public void getCustomersFromCSV(String filename) {
+        // get all the records from csv into dictionary, then add each record to customers
         ArrayList<Dictionary<String, String>> allRecords = getAllRecordsFromCSV(filename);
         for (Dictionary<String, String> recordDict : allRecords){
             if (!BankDatabase.getInstance().addCustomer(recordDict)) System.out.println("Failed to add customer.");
@@ -43,11 +44,13 @@ public class FileHandler {
         boolean rc = false;
         int accountNum = account.getAccountNumber();
         String err = "Failed to add account with account number: " + accountNum + ". Reason: Account with that account number already exists.";
+        // switch based on account type
         switch (account) {
             case Checking ignored -> {
                 TreeSet<Integer> checkingAccNums = BankDatabase.getInstance().getCheckingAccNums();
                 rc = checkingAccNums.add(accountNum);
                 Dictionary<Integer, Checking> checkingAccounts = BankDatabase.getInstance().getCheckingAccounts();
+                // append new checking account to database
                 if (rc) checkingAccounts.put(accountNum, (Checking) account);
                 else this.appendLog("EPMB_Error_Log", err);
             }
@@ -55,6 +58,7 @@ public class FileHandler {
                 TreeSet<Integer> savingsAccNums = BankDatabase.getInstance().getSavingsAccNums();
                 rc = savingsAccNums.add(accountNum);
                 Dictionary<Integer, Savings> savingAccounts = BankDatabase.getInstance().getSavingsAccounts();
+                // append new saving account to database
                 if (rc) savingAccounts.put(accountNum, (Savings) account);
                 else this.appendLog("EPMB_Error_Log", err);
             }
@@ -62,6 +66,7 @@ public class FileHandler {
                 TreeSet<Integer> creditAccNums = BankDatabase.getInstance().getCreditAccNums();
                 rc = creditAccNums.add(accountNum);
                 Dictionary<Integer, Credit> creditAccounts = BankDatabase.getInstance().getCreditAccounts();
+                // append new credit account to database
                 if (rc) creditAccounts.put(accountNum, (Credit) account);
                 else this.appendLog("EPMB_Error_Log", err);
             }
@@ -165,6 +170,7 @@ public class FileHandler {
      */
     public Dictionary<String, String> recordToDictionary(String[] values, String[] headers) {
         Dictionary<String, String> recordDict = new Hashtable<>();
+        // map value to dictionary header
         for (int i = 0; i < headers.length; i++) recordDict.put(headers[i].trim(), values[i].trim());
         return recordDict;
     }
@@ -181,6 +187,7 @@ public class FileHandler {
         filename += ".csv";
         try (Scanner scan = new Scanner(new File(filename))) {
             scan.nextLine();
+            // for every line map record to dictionary based on headers from csv
             while (scan.hasNextLine()) {
                 String line = scan.nextLine();
                 String[] values = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
@@ -188,7 +195,7 @@ public class FileHandler {
                 allRecords.add(recordDict);
             }
         } catch (IOException e) {
-            out.println("Error loading from file: " + e.getMessage());
+            return null;
         }
         return allRecords;
     }
@@ -203,6 +210,7 @@ public class FileHandler {
         String[] headers = null;
         filename += ".csv";
         try (Scanner scan = new Scanner(new File(filename))) {
+            // grab first line from file to be headers (comma-separated)
             headers = scan.nextLine().split(",");
         } catch (IOException e) {
             out.println("Error loading from file: " + e.getMessage());
@@ -226,24 +234,28 @@ public class FileHandler {
         List<TransactionNode> filteredTransactions = account.getTransactionList().getTransactionsBetweenDates(startDate, endDate);
         File file = new File(filename);
         try {
+            // set file to writeable
             if (file.exists()) if (!file.setWritable(true)) System.out.println("An error occurred while attempting to set the file as writable. File: " + filename);
             try (FileWriter myWriter = new FileWriter(file, true)) {
+                // top header line for each account
                 String header = String.format("Name: %s\nID: %s\nAccount: %s\nAccount ID: %s\nStarting Balance: $%.2f\nStatement Period: %s to %s\n==================================================\n",
                         customer.getFullName(), customer.getId(), account.getType(), account.getAccountNumber(), startingBalance, startDate, endDate);
                 myWriter.write(header);
+                // filter based on time range
                 for (TransactionNode trans : filteredTransactions) {
                     String transactionDetails = String.format("Date: %s\nDescription: %s\nAmount: $%.2f\nNew Balance: $%.2f\n-------------------------------------\n",
                             trans.date, trans.description, trans.amount, trans.newBalance);
                     myWriter.write(transactionDetails);
                 }
+                // print ending balance
                 String footer = String.format("Ending balance: $%.2f\n==================================================\n", account.getBalance());
                 myWriter.write(footer);
             }
             return true;
-
         } catch (IOException e) {
             System.out.println("Error writing to file: " + e.getMessage());
         } finally {
+            // make file read-only once finished
             if (!file.setWritable(false)) System.out.println("An error occurred while attempting to set the file as read-only. File: " + filename);
         }
         return false;

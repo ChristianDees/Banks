@@ -15,7 +15,14 @@ import java.util.Dictionary;
  */
 public class Manager implements Person{
 
+    /**
+     * Manager's first name
+     */
     String firstName;
+
+    /**
+     * Manager's last name
+     */
     String lastName;
 
     /**
@@ -37,15 +44,18 @@ public class Manager implements Person{
     public void transactFromFile(String filename) {
         FileHandler fh = new FileHandler();
         ArrayList<Dictionary<String, String>> allRecords = fh.getAllRecordsFromCSV("Transactions/"+filename);
-
+        // for every record dictionary in all the csv records
+        if (allRecords==null)return;
         for (Dictionary<String, String> recordDict : allRecords) {
             String fromCustomerName = (recordDict.get("From First Name") + recordDict.get("From Last Name")).toLowerCase();
             Customer fromCustomer = BankDatabase.customers.get(fromCustomerName);
+            // check if source customer exists
             if (fromCustomer != null) {
                 String action = recordDict.get("Action").toLowerCase();
                 String toCustomerName = (recordDict.get("To First Name") + recordDict.get("To Last Name")).toLowerCase();
                 Customer toCustomer = BankDatabase.customers.get(toCustomerName);
                 Account fromAccount = null;
+                // check if source account is owned by source customer and it exists
                 for (Account account : fromCustomer.getAccounts()) {
                     if (account.getType().equalsIgnoreCase(recordDict.get("From Where"))) {
                         fromAccount = account;
@@ -53,6 +63,7 @@ public class Manager implements Person{
                     }
                 }
                 Account toAccount = null;
+                // get destination account if required
                 if (toCustomer != null) {
                     for (Account account : toCustomer.getAccounts()) {
                         if (account.getType().equalsIgnoreCase(recordDict.get("To Where"))) {
@@ -61,11 +72,14 @@ public class Manager implements Person{
                         }
                     }
                 }
+                // continue if source account exists
                 if (fromAccount != null) {
                     double amount = recordDict.get("Action Amount").isEmpty() ? 0 : Double.parseDouble(recordDict.get("Action Amount"));
                     boolean rc;
+                    // switch based on transaction type
                     switch (action) {
                         case "pays":
+                            // check if send is successful
                             rc = fromCustomer.send(fromAccount, toAccount, amount, toCustomer);
                             if (!rc && toCustomer!=null) fh.appendLog("EPMB_Error_Log", fromCustomer.getFullName() + " [ID=" + fromCustomer.getId() + "]"+ " attempted to send funds to "  + toCustomer.getFullName() + " [ID=" + fromCustomer.getId() + "]"+ ".");
                             else if (!rc)fh.appendLog("EPMB_Error_Log", fromCustomer.getFullName() + " attempted to send funds without a valid receiving customer.");
@@ -75,6 +89,7 @@ public class Manager implements Person{
                             }
                             break;
                         case "transfers":
+                            // check if transfer is successful
                             rc = fromCustomer.transfer(fromAccount, toAccount, amount);
                             if (!rc) fh.appendLog("EPMB_Error_Log", fromCustomer.getFullName() + " [ID=" + fromCustomer.getId() + "]"+  " attempted to transfer invalidly.");
                             else {
@@ -83,15 +98,18 @@ public class Manager implements Person{
                             }
                             break;
                         case "inquires":
+                            // no checking, inquiring is free of charge
                             fromCustomer.viewAccount(fromAccount, true);
                             fh.appendLog("EPMB_Transactions", fromCustomer.getFullName() + " [ID:" + fromCustomer.getId() + "] inquired the details of " + fromAccount.getType() + " [ID=" + fromAccount.getAccountNumber() +"]");
                             break;
                         case "withdraws":
+                            // check if withdraw is successful
                             rc = fromCustomer.withdraw(fromAccount, amount);
                             if (!rc) fh.appendLog("EPMB_Error_Log", fromCustomer.getFullName()+ " [ID=" + fromCustomer.getId() + "]" + " attempted to withdraw funds.");
                             else fh.appendLog("EPMB_Transactions", fromCustomer.getFullName() + " [ID:" + fromCustomer.getId() + "] withdrew $" + String.format("%2f", amount) + " from " + fromAccount.getType() + " [ID=" + fromAccount.getAccountNumber() +"]");
                             break;
                         case "deposits":
+                            // check if deposit is successful
                             rc = fromCustomer.deposit(toAccount, amount);
                             if (!rc) fh.appendLog("EPMB_Error_Log", fromCustomer.getFullName()+ " [ID=" + fromCustomer.getId() + "]" + " attempted to deposit funds.");
                             else {

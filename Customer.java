@@ -13,14 +13,50 @@ import java.util.*;
  * Represents a customer with their accounts, dob, address, phone number, and unique id number
  */
 public class Customer implements Person{
+
+    /**
+     * customer's unique id number
+     */
     int idNum;
+
+    /**
+     * customer's first name
+     */
     String firstName;
+
+    /**
+     * customer's last name
+     */
     String lastName;
+
+    /**
+     * customer's date of birth
+     */
     String dob;
+
+    /**
+     * customer's address
+     */
     String address;
+
+    /**
+     * customer's phone number
+     */
     String phoneNum;
+
+    /**
+     * customer's credit score
+     */
     int creditScore;
+
+    /**
+     * customer's owned accounts
+     */
     ArrayList<Account> accounts = new ArrayList<>();
+
+    /**
+     * customer's password
+     */
     String password;
 
     /**
@@ -123,13 +159,11 @@ public class Customer implements Person{
      */
     public void viewAccounts(boolean viewBalance) {
         boolean creditAccountExists = accounts.stream().anyMatch(account -> "Credit".equals(account.getType()));
+        // handle printing the credit account
         if (creditAccountExists) {
             Credit creditAccount = (Credit) accounts.stream().filter(account -> "Credit".equals(account.getType())).findFirst().orElse(null);
             if (creditAccount != null) creditAccount.printHeader(viewBalance);
-        } else if (!accounts.isEmpty()) {
-            accounts.getFirst().printHeader(viewBalance);
-        }
-
+        } else if (!accounts.isEmpty()) accounts.getFirst().printHeader(viewBalance);
         accounts.forEach(account -> account.printAccount(viewBalance, false));
     }
 
@@ -140,11 +174,9 @@ public class Customer implements Person{
      * @param viewBalance   Print the balance if true, don't if false.
      */
     public void viewAccount(Account account, boolean viewBalance) {
-        if (this.accounts.contains(account)){
-            account.printAccount(viewBalance, viewBalance);
-        } else {
-            System.out.println("This account does not belong to this owner!");
-        }
+        // only print if owned by customer
+        if (this.accounts.contains(account)) account.printAccount(viewBalance, viewBalance);
+        else System.out.println("This account does not belong to this owner!");
     }
 
     /**
@@ -169,10 +201,12 @@ public class Customer implements Person{
      * @return          The successfulness of money being transferred.
      * **/
     public boolean transfer(Account src, Account dst, double amount) {
+        // check if valid transfer
         if (!this.accounts.contains(src) || !this.accounts.contains(dst) || src.equals(dst)) {
             System.out.println("\nWarning: The customer must own both accounts to transfer funds between them and the accounts cannot be the same.");
             return false;
         }
+        // check if valid withdraw
         boolean rc = src.withdraw(amount) && dst.deposit(amount);
         String transferMsg = "Transfer of funds to " + dst.getType() + " [id=" + dst.getAccountNumber() + "]";
         String receiveMsg = "Transfer of funds from " + src.getType() + " [id=" + src.getAccountNumber() + "]";
@@ -182,6 +216,7 @@ public class Customer implements Person{
             System.out.println("\n*  *  *  *  *  *  *  *  *  *  *  *  Transfer Successful  *  *  *  *  *  *  *  *  *  *  *");
         }
         else System.out.println("\n*  *  *  *  *  *  *  *  *  *  *  *    Transfer Failed    *  *  *  *  *  *  *  *  *  *  *");
+        // print appropriate accounts when finished
         src.printAccount(true, true);
         dst.printAccount(true, false);
         return rc;
@@ -198,10 +233,12 @@ public class Customer implements Person{
      * @return          The successfulness of money being sent.
      * **/
     public boolean send(Account src, Account dst, double amount, Customer toCustomer) {
+        // check if valid send
         if (this.accounts.contains(src) && this.accounts.contains(dst)) {
             System.out.println("\nWarning: Customers cannot send funds to themselves; please use the transfer option instead.");
             return false;
         }
+        // check if valid withdraw
         boolean rc = src.withdraw(amount) && dst.deposit(amount);
         String transactionMessage = "Sent funds to " + toCustomer.getFullName();
         String depositMessage = "Received funds from " + this.getFullName();
@@ -210,6 +247,7 @@ public class Customer implements Person{
             src.addTransaction(transactionMessage, amount);
             System.out.println("\n*  *  *  *  *  *  *  *  *  *  *  *    Send Successful    *  *  *  *  *  *  *  *  *  *  *");
         } else System.out.println("*  *  *  *  *  *  *  *  *  *  *  *      Send Failed      *  *  *  *  *  *  *  *  *  *  *");
+        // print appropriate accounts when finished
         src.printAccount(true, true);
         dst.printAccount(false, false);
         return rc;
@@ -223,10 +261,12 @@ public class Customer implements Person{
      * @return                  true if success/false if failed.
      */
     public boolean withdraw(Account src, double amount) {
+        // check if customer owns this account
         if (!this.accounts.contains(src)) {
             System.out.println("\nWarning: This account does not belong to this customer.");
             return false;
         }
+        // check if valid withdraw
         boolean rc = src.withdraw(amount);
         if (rc) {
             String transactionMessage = "Withdrawal of funds";
@@ -234,6 +274,7 @@ public class Customer implements Person{
             System.out.println("\n*  *  *  *  *  *  *  *  *  *  *  *  Withdraw Successful  *  *  *  *  *  *  *  *  *  *  *");
         }
         else System.out.println("\n*  *  *  *  *  *  *  *  *  *  *  *    Withdraw Failed    *  *  *  *  *  *  *  *  *  *  *");
+        // print customer's affected account
         src.printAccount(true, true);
         return rc;
     }
@@ -246,16 +287,19 @@ public class Customer implements Person{
      * @return                  true if success/false if failed.
      */
     public boolean deposit(Account src, double amount) {
+        // check if customer owns this account
         if (!this.accounts.contains(src)) {
             System.out.println("\nWarning: Deposits are only permitted into accounts owned by the customer.");
             return false;
         }
+        // check if valid deposit
         boolean rc = src.deposit(amount);
         if (rc) {
             String transactionMessage = "Deposit of funds";
             src.addTransaction(transactionMessage, amount);
             System.out.println("\n*  *  *  *  *  *  *  *  *  *  *  *  Deposit Successful   *  *  *  *  *  *  *  *  *  *  *");
         } else System.out.println("\n*  *  *  *  *  *  *  *  *  *  *  *     Deposit Failed    *  *  *  *  *  *  *  *  *  *  *");
+        // print appropriate accounts when finished
         src.printAccount(true, true);
         return rc;
     }
@@ -270,6 +314,7 @@ public class Customer implements Person{
         double limit = account.getCreditMax();
         Random random = new Random();
         int lower, upper;
+        // get upper and lower limits based on credit limit
         if (limit >= 100 && limit <= 699) {
             lower = 0; upper = 580;
         } else if (limit >= 700 && limit <= 4999) {
@@ -283,9 +328,16 @@ public class Customer implements Person{
         } else {
             return 0;
         }
+        // return user's randomly generated credit score
         return random.nextInt(upper - lower + 1) + lower;
     }
 
+    /**
+     * Check if a given password is the same as the customer's set password.
+     *
+     * @param attempt   entered password.
+     * @return          if passwords match.
+     */
     public boolean verifyPassword(String attempt) {return attempt.equals(this.password);}
 
     /**

@@ -12,10 +12,30 @@
  * Transaction Node with its respective attributes for a transaction.
  */
 public class TransactionNode {
+
+    /**
+     * Date the transaction took place.
+     */
     String date;
+
+    /**
+     * Description of the transaction.
+     */
     String description;
+
+    /**
+     * Amount of the transaction.
+     */
     double amount;
+
+    /**
+     * The new balance of the account after the transaction.
+     */
     double newBalance;
+
+    /**
+     * The next node to point to
+     */
     TransactionNode next;
 
     /**
