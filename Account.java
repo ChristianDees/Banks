@@ -76,10 +76,7 @@ public abstract class Account {
      * @param amount    amount to be deposited.
      * @return          success/fail of deposit.
      */
-    public boolean deposit(double amount){
-        this.balance += amount;
-        return true;
-    }
+    public abstract boolean deposit(double amount);
 
     /**
      * Take money out of an account.
@@ -88,14 +85,7 @@ public abstract class Account {
      *
      * @return          The successfulness of a withdrawal.
      * **/
-    public boolean withdraw(double amount){
-        if (amount <= this.balance && amount > 0){
-            this.balance -= amount;
-            return true;
-        }
-        System.out.println("\nWarning: Insufficient funds.");
-        return false;
-    }
+    public abstract boolean withdraw(double amount);
 
     /**
      * Print attributes of an account

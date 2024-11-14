@@ -306,6 +306,13 @@ public abstract class UserInterface {
         else out.println("\n* * * Failed to add new customer. * * *\n");
     }
 
+    /**
+     * Query the user for a password.
+     *
+     * @param customer  customer that is being inquired.
+     * @param scan      scanner object.
+     * @return          if password is correct.
+     */
     private boolean requestPassword(Customer customer, Scanner scan){
         String inp;
         for (int i = 0; i < 3; i++){

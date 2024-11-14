@@ -186,11 +186,14 @@ public class BankDatabase {
             fh.appendLog("EPMB_Error_Log", "Failed to add user with id: " + idNum + ". Reason: User with that id already exists.");
         } else {
             Customer newCustomer = new Customer(idNum, firstName, lastName, dob, address, phoneNum, password);
-            Checking checkingAcc = new Checking(checkingAccNum, checkingStartBalance);
-            Savings savingsAcc = new Savings(savingsAccNum, savingsStartBalance);
-            Credit creditAcc = new Credit(creditAccNum, creditStartBalance, creditMax);
+            Account checkingAcc = AccountFactory.getAccount("checking", checkingAccNum, checkingStartBalance, 0);
+            Account savingsAcc = AccountFactory.getAccount("savings", savingsAccNum, savingsStartBalance, 0);
+            Account creditAcc = AccountFactory.getAccount("credit", creditAccNum, creditStartBalance, creditMax);
+            assert checkingAcc != null;
             if (fh.addAccountToMaps(checkingAcc)) newCustomer.addAccount(checkingAcc);
+            assert savingsAcc != null;
             if (fh.addAccountToMaps(savingsAcc)) newCustomer.addAccount(savingsAcc);
+            assert creditAcc != null;
             if (fh.addAccountToMaps(creditAcc)) newCustomer.addAccount(creditAcc);
             customers.put(firstName+lastName, newCustomer);
         }

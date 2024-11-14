@@ -21,4 +21,32 @@ public class Checking extends Account{
     Checking(int accNum, double startBalance){
         super(accNum, startBalance);
     }
+
+    /**
+     * Success indicating that deposit was successful.
+     *
+     * @param amount    amount to be deposited.
+     * @return          success/fail of deposit.
+     */
+    public boolean deposit(double amount){
+        this.balance += amount;
+        return true;
+    }
+
+    /**
+     * Take money out of an account.
+     *
+     * @param amount    amount to be withdrawn.
+     *
+     * @return          The successfulness of a withdrawal.
+     * **/
+    public boolean withdraw(double amount){
+        if (amount <= this.balance && amount > 0){
+            this.balance -= amount;
+            return true;
+        }
+        System.out.println("\nWarning: Insufficient funds.");
+        return false;
+    }
+
 }
