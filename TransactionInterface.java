@@ -28,17 +28,17 @@ public class TransactionInterface extends UserInterface {
         for (int attempts = 0; attempts < 3; attempts++) {
             System.out.print("Enter deposit amount: \n$");
             String depositAmountStr = scan.nextLine();
-            double depositAmount = this.validateMoney(depositAmountStr);
-            // if successful
-            if (depositAmount >= 0) {
+            try {
+                double depositAmount = this.validateMoney(depositAmountStr);
                 boolean rc = customer.deposit(account, depositAmount);
                 if (rc) fh.appendLog("EPMB_Transactions", customer.getFullName() + " [ID:" + customer.getId() + "] made a deposit of $" + String.format("%.2f", depositAmount) +
                         " to " + account.getType() + " account [Account Number: " + account.getAccountNumber() + "]. Current balance: $" + String.format("%.2f", account.getBalance()));
                 else fh.appendLog("EPMB_Error_Log", "Reason for failure: Customer does not own this account or insufficient funds.");
                 return;
-            } else {
+
+            } catch (InvalidCurrencyFormat e) {
                 // error logging
-                System.out.println("Invalid format. Please try again.");
+                System.out.println("Error" + e.getMessage());
             }
         }
         // error logging
@@ -59,8 +59,8 @@ public class TransactionInterface extends UserInterface {
         for (int attempts = 0; attempts < 3; attempts++) {
             System.out.print("Enter withdrawal amount: \n$");
             String withdrawAmountStr = scan.nextLine();
-            double withdrawAmount = this.validateMoney(withdrawAmountStr);
-            if (withdrawAmount >= 0) {
+            try {
+                double withdrawAmount = this.validateMoney(withdrawAmountStr);
                 // withdraw amount from an account
                 boolean success = customer.withdraw(account, withdrawAmount);
                 String logMessage = customer.getFullName() + " [ID:" + customer.getId() + "] attempted a withdrawal of $" + String.format("%.2f", withdrawAmount) +
@@ -72,11 +72,11 @@ public class TransactionInterface extends UserInterface {
                     fh.appendLog("EPMB_Error_Log", logMessage + " Reason for failure: Insufficient funds.");
                 }
                 return;
-            } else {
+            } catch (InvalidCurrencyFormat e) {
                 // error logging
                 fh.appendLog("EPMB_Error_Log", customer.getFullName() + " [ID:" + customer.getId() + "] attempted a withdrawal from " +
                         account.getType() + " account [Account Number:" + account.getAccountNumber() + "]. Reason for failure: Inappropriate formatting. Current balance: $" + String.format("%.2f", account.getBalance()));
-                System.out.println("Invalid format. Please try again.");
+                System.out.println("Error: " + e.getMessage());
             }
         }
         fh.appendLog("EPMB_Error_Log", customer.getFullName() + " [ID:" + customer.getId() + "] reached maximum attempts.");
@@ -175,9 +175,8 @@ public class TransactionInterface extends UserInterface {
         for (int attempts = 0; attempts < 3; attempts++) {
             System.out.print("Enter transfer amount: \n$");
             String transferAmountStr = scan.nextLine();
-            double transferAmount = this.validateMoney(transferAmountStr);
-            // if successful
-            if (transferAmount >= 0) {
+            try {
+                double transferAmount = this.validateMoney(transferAmountStr);
                 boolean rc = customer.transfer(accountOne, accountTwo, transferAmount);
                 String logMessage = customer.getFullName() + " [ID:" + customer.getId() + "] attempted a transfer of $" + String.format("%.2f", transferAmount) +
                         " from " + accountOne.getType() + " account [Account Number:" + accountOne.getAccountNumber() +
@@ -188,11 +187,11 @@ public class TransactionInterface extends UserInterface {
                 else // error logging
                     fh.appendLog("EPMB_Error_Log", logMessage + " Reason for failure: Insufficient funds or incorrect account.");
                 return;
-            } else {
+            } catch (InvalidCurrencyFormat e){
                 // error logging
                 fh.appendLog("EPMB_Error_Log", customer.getFullName() + " [ID:" + customer.getId() + "] attempted a transfer of $" + transferAmountStr + " from " +
                         accountOne.getType() + " to " + accountTwo.getType() + " Reason for failure: Inappropriate format.");
-                System.out.println("Invalid format. Please try again.");
+                System.out.println("Error: " + e.getMessage());
             }
         }
         // error logging
@@ -214,9 +213,9 @@ public class TransactionInterface extends UserInterface {
         for (int attempts = 0; attempts < 3; attempts++) {
             System.out.print("Enter amount to be sent: \n$");
             String sendAmountStr = scan.nextLine();
-            double sendAmount = this.validateMoney(sendAmountStr);
-            // if successful
-            if (sendAmount >= 0) {
+
+            try{
+                double sendAmount = this.validateMoney(sendAmountStr);
                 boolean rc = customerOne.send(accountOne, accountTwo, sendAmount, customerTwo);
                 String logMessage = customerOne.getFullName() + " [ID:" + customerOne.getId() + "] attempted to send $" + String.format("%.2f", sendAmount) +
                         " from " + accountOne.getType() + " account [Account Number:" + accountOne.getAccountNumber() +
@@ -229,11 +228,11 @@ public class TransactionInterface extends UserInterface {
                     fh.appendLog("EPMB_Error_Log", logMessage + " Reason for failure: Insufficient funds or incorrect accounts.");
                 }
                 return;
-            } else {
+            } catch (InvalidCurrencyFormat e) {
                 // error logging
-                fh.appendLog("EPMB_Error_Log", customerOne.getFullName() + " [ID:" + customerOne.getId() + "] attempted to send $" + String.format("%.2f", sendAmount) +
+                fh.appendLog("EPMB_Error_Log", customerOne.getFullName() + " [ID:" + customerOne.getId() + "] attempted to send funds" +
                         " from " + accountOne.getType() + " account [Account Number:" + accountOne.getAccountNumber() + "] to " + customerOne.getFullName() + " [ID:" + customerOne.getId() + "] " + accountTwo.getType() + " account [Account Number:" + accountTwo.getAccountNumber() + "]. Reason for Failure: Inappropriate format.");
-                System.out.println("Invalid amount. Please try again.");
+                System.out.println("Error: " + e.getMessage());
             }
         }
         // error logging
@@ -260,10 +259,10 @@ public class TransactionInterface extends UserInterface {
      * @param input The input of money.
      * @return      If format is valid or not.
      */
-    private double validateMoney(String input) {
+    private double validateMoney(String input) throws InvalidCurrencyFormat {
         boolean correctFormat = Pattern.matches("^(\\d{1,3}(,\\d{3})*(\\.\\d{1,2})?|\\d+(\\.\\d{1,2})?)$", input);
         if (correctFormat) return Double.parseDouble(input.replace(",", ""));
-        return -1;
+        throw new InvalidCurrencyFormat("Currency format is invalid.");
     }
 
 }
