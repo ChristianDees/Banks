@@ -130,7 +130,7 @@ class ElPasoMinersBankJUnitTesting {
     void testTransactionFromFile() {
         assertAll(
                 "Transactions file generation verification",
-                () -> assertTrue(fh.generateUserTransactionsFile("fake-transactions", customerA, accountA, "11-16-2024","11-16-2024"))
+                () -> assertTrue(fh.generateUserTransactionsFile("fake-transactions.txt", customerA, accountA, "11-16-2024","11-16-2024"))
         );
     }
 
