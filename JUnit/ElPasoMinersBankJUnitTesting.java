@@ -1,27 +1,40 @@
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-class CustomerTest {
+class ElPasoMinersBankJUnitTesting {
 
     Customer customerA;
     Customer customerB;
     Account accountA;
     Account accountB;
     Account accountC;
+    Account accountD;
+    Account accountE;
+    Manager manager;
+    FileHandler fh;
 
     @BeforeEach
     void setUp() {
         // setup customers
-        customerA = new Customer(1, "John","Smith","12-Jan-03","123 Sesame St.", "(123) 456-7890", "123");
-        customerB = new Customer(2, "John","Doe","14-Aug-01","321 Sesame St.", "(098) 765-4321", "123");
+        customerA = new Customer(1, "John","Smith","12-Jan-03","123 Sesame St.", "123456890", "123");
+        customerB = new Customer(2, "John","Doe","14-Aug-01","321 Sesame St.", "0987654321", "123");
         // setup accounts
         accountA = new Checking(1, 123.45);
         accountB = new Checking(2, 123.45);
         accountC = new Checking(3, 123.45);
+        // credit account
+        accountD = new Credit(4, 0, 1000);
+        // savings account
+        accountE = new Savings(5, 123.45);
         // assign accounts to customers
         customerA.addAccount(accountA);
         customerA.addAccount(accountC);
+        customerA.addAccount(accountD);
+        customerA.password = "password123!";
 
+        // setup for manager
+        manager = new Manager("admin","admin");
+        fh = new FileHandler();
     }
 
     @AfterEach
@@ -29,8 +42,12 @@ class CustomerTest {
         accountA = null;
         accountB = null;
         accountC = null;
+        accountD = null;
+        accountE = null;
         customerA = null;
         customerB = null;
+        manager = null;
+        fh = null;
     }
 
     @Test
@@ -83,6 +100,58 @@ class CustomerTest {
                 "Withdraw return tests",
                 () -> assertEquals("John Smith", customerA.getFullName()),
                 () -> assertEquals("John Doe", customerB.getFullName())
+        );
+    }
+
+    @Test
+    @DisplayName("Ensure correct response of generate credit score.")
+    void testGenerateCreditScore() {
+        assertAll(
+                "Credit score return tests",
+                () -> assertTrue(customerA.getCreditScore() >= 300 && customerA.getCreditScore() <= 850,
+                        "Credit score should be within the valid range (300 - 850)")
+        );
+    }
+
+
+    @Test
+    @DisplayName("Ensure correct response of password verification.")
+    void testVerifyPassword() {
+        assertAll(
+                "Password verifications",
+                () -> assertTrue(customerA.verifyPassword("password123!")),
+                () -> assertFalse(customerA.verifyPassword("notMyPassword!"))
+        );
+    }
+
+
+    @Test
+    @DisplayName("Ensure proper user transactions file.")
+    void testTransactionFromFile() {
+        assertAll(
+                "Transactions file generation verification",
+                () -> assertTrue(fh.generateUserTransactionsFile("fake-transactions", customerA, accountA, "11-16-2024","11-16-2024"))
+        );
+    }
+
+    @Test
+    @DisplayName("Ensure proper return of account types.")
+    void testGetTypeAccount() {
+        assertAll(
+                "Verify account type returns.",
+                () -> assertEquals("Checking", accountA.getType()),
+                () -> assertEquals("Savings", accountE.getType()),
+                () -> assertEquals("Credit", accountD.getType())
+        );
+    }
+
+    @Test
+    @DisplayName("Ensure proper return of get phone number.")
+    void testGetPhoneNumbers() {
+        assertAll(
+                "Verify phone number returns.",
+                () -> assertEquals("(123) 456-890", customerA.getPhoneNum()),
+                () -> assertEquals("(098) 765-4321", customerB.getPhoneNum())
         );
     }
 }
