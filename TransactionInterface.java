@@ -264,5 +264,4 @@ public class TransactionInterface extends UserInterface {
         if (correctFormat) return Double.parseDouble(input.replace(",", ""));
         throw new InvalidCurrencyFormat("Currency format is invalid.");
     }
-
 }

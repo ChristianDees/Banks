@@ -2,7 +2,6 @@
  * Represents factory of creating accounts based on type.
  */
 public class AccountFactory {
-
     /**
      * Get account based on type.
      *
