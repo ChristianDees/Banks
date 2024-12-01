@@ -1,0 +1,27 @@
+Name: Christian Dees
+ID: 104
+Account: Checking
+Account ID: 1121
+Starting Balance: $0.00
+Statement Period: 11-13-2024 to 11-13-2024
+==================================================
+Ending balance: $0.00
+==================================================
+Name: Christian Dees
+ID: 104
+Account: Savings
+Account ID: 2103
+Starting Balance: $0.00
+Statement Period: 11-13-2024 to 11-13-2024
+==================================================
+Ending balance: $0.00
+==================================================
+Name: Christian Dees
+ID: 104
+Account: Credit
+Account ID: 3103
+Starting Balance: $0.00
+Statement Period: 11-13-2024 to 11-13-2024
+==================================================
+Ending balance: $0.00
+==================================================
