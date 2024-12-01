@@ -1,7 +1,7 @@
 .idea/
 out/
 *.txt
-BankReports/*
+BankReports/*.csv
 BankStatements/*.txt
 UserTransactions/*.txt
 *~
