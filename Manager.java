@@ -159,6 +159,11 @@ public class Manager implements Person{
         }
     }
 
+    /**
+     * Gets a manager's full name
+     *
+     * @return The person's full name
+     * **/
     @Override
     public String getFullName() {
         return this.firstName + " " + this.lastName;
