@@ -10,6 +10,9 @@
 import java.util.Scanner;
 import static java.lang.System.out;
 
+/**
+ * Represents how a manager interacts with the system.
+ */
 public class ManagerInterface extends UserInterface{
 
     /**
