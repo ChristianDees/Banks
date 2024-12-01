@@ -4,7 +4,6 @@ out/
 BankReports/*.csv
 BankStatements/*.txt
 UserTransactions/*.txt
-!UserTransactions/
 *~
 
 
