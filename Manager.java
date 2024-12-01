@@ -52,33 +52,30 @@ public class Manager implements Person{
             String toCustomerName = (recordDict.get("To First Name") + recordDict.get("To Last Name")).toLowerCase();
             Customer toCustomer = BankDatabase.customers.get(toCustomerName);
             String action = recordDict.get("Action").toLowerCase();
+            String fromAccountType = recordDict.get("From Where");
             Account fromAccount = null;
             // get source account if required
             if (fromCustomer != null) {
                 for (Account account : fromCustomer.getAccounts()) {
-                    if (account.getType().equalsIgnoreCase(recordDict.get("From Where"))) {
+                    if (account.getType().equalsIgnoreCase(fromAccountType)) {
                         fromAccount = account;
                         break;
                     }
                 }
             }
             Account toAccount = null;
+            String toAccountType = recordDict.get("To Where");
             // get destination account if required
             if (toCustomer != null) {
                 for (Account account : toCustomer.getAccounts()) {
-                    if (account.getType().equalsIgnoreCase(recordDict.get("To Where"))) {
+                    if (account.getType().equalsIgnoreCase(toAccountType)) {
                         toAccount = account;
                         break;
                     }
                 }
             }
-
-            // DEPOSIT = ONLY TO
-            // INQUIRE = ONLY FROM
-            // WITHDRAW = ONLY FROM
-            // process action
-
             double amount = recordDict.get("Action Amount").isEmpty() ? 0 : Double.parseDouble(recordDict.get("Action Amount"));
+            String amountStr = String.format("%.2f", amount);
             boolean rc;
             String err = "";
             String err1 = "source not specified";
@@ -95,7 +92,8 @@ public class Manager implements Person{
                             if (!rc) fh.appendLog("EPMB_Error_Log", fromCustomer.getFullName() + " [ID=" + fromCustomer.getId() + "]" + " attempted to send funds to " + toCustomer.getFullName() + " [ID=" + fromCustomer.getId() + "]" + ".");
                             else {
                                 assert fromAccount != null;
-                                fh.appendLog("EPMB_Transactions", fromCustomer.getFullName() + " [ID:" + fromCustomer.getId() + "] sent funds to " + toCustomer.getFullName() + " [ID=" + toCustomer.getId() + "]." + " Account's Current Balance: $" + String.format("%.2f", fromAccount.getBalance()));
+                                assert toAccount != null;
+                                fh.appendLog("EPMB_Transactions", fromCustomer.getFullName() + " [ID=" + fromCustomer.getId() + "] sent $" + amountStr + " from " + fromAccount.getType() + " [ID=" + fromAccount.getAccountNumber() + "]" + " to " + toCustomer.getFullName() + "'s " + "[ID=" + toCustomer.getId() + "] " + toAccount.getType() + " [ID=" + toAccount.getAccountNumber() + "]");
                             }
                         } else err = err2;
                     } else err = err1;
@@ -110,7 +108,7 @@ public class Manager implements Person{
                             else {
                                 assert toAccount != null;
                                 assert fromAccount != null;
-                                fh.appendLog("EPMB_Transactions", fromCustomer.getFullName() + " [ID:" + fromCustomer.getId() + "] transferred funds from " + fromAccount.getType() + " [ID=" + fromAccount.getAccountNumber() + "] to " + toAccount.getType() + " [ID=" + toAccount.getAccountNumber() + "]" + "Account's Current Balance: $" + String.format("%.2f", fromAccount.getBalance()));
+                                fh.appendLog("EPMB_Transactions", fromCustomer.getFullName() + " [ID=" + fromCustomer.getId() + "] transferred $" + amountStr +  " from " + fromAccount.getType() + " [ID=" + fromAccount.getAccountNumber() + "] to " + toAccount.getType() + " [ID=" + toAccount.getAccountNumber() + "]");
                             }
                         } else err = err2;
                     } else err = err1;
@@ -121,20 +119,20 @@ public class Manager implements Person{
                         if (toCustomer == null){
                             fromCustomer.viewAccount(fromAccount, true);
                             assert fromAccount != null;
-                            fh.appendLog("EPMB_Transactions", fromCustomer.getFullName() + " [ID:" + fromCustomer.getId() + "] inquired the details of " + fromAccount.getType() + " [ID=" + fromAccount.getAccountNumber() +"]");
+                            fh.appendLog("EPMB_Transactions", fromCustomer.getFullName() + " [ID=" + fromCustomer.getId() + "] inquired the details of " + fromAccount.getType() + " [ID=" + fromAccount.getAccountNumber() +"]");
                         } else err = err4;
                     } else err = err1;
                     break;
                 case "withdraws":
                     // check if withdraw is successful
                     if (fromCustomer != null) {
-                        if (toCustomer == null) {
+                        if (toCustomer == null && toAccountType.isEmpty()) {
                             rc = fromCustomer.withdraw(fromAccount, amount);
                             if (!rc)
                                 fh.appendLog("EPMB_Error_Log", fromCustomer.getFullName() + " [ID=" + fromCustomer.getId() + "]" + " attempted to withdraw funds.");
                             else {
                                 assert fromAccount != null;
-                                fh.appendLog("EPMB_Transactions", fromCustomer.getFullName() + " [ID:" + fromCustomer.getId() + "] withdrew $" + String.format("%2f", amount) + " from " + fromAccount.getType() + " [ID=" + fromAccount.getAccountNumber() + "]");
+                                fh.appendLog("EPMB_Transactions", fromCustomer.getFullName() + " [ID=" + fromCustomer.getId() + "] withdrew $" + amountStr + " from " + fromAccount.getType() + " [ID=" + fromAccount.getAccountNumber() + "]");
                             }
                         } else err = err4;
                     } else err = err1;
@@ -142,12 +140,12 @@ public class Manager implements Person{
                 case "deposits":
                     // check if deposit is successful
                     if (toCustomer != null) {
-                        if (fromCustomer == null) {
+                        if (fromCustomer == null && fromAccountType.isEmpty()) {
                             rc = toCustomer.deposit(toAccount, amount);
                             if (!rc) fh.appendLog("EPMB_Error_Log", toCustomer.getFullName()+ " [ID=" + toCustomer.getId() + "]" + " attempted to deposit funds.");
                             else {
                                 assert toAccount != null;
-                                fh.appendLog("EPMB_Transactions", toCustomer.getFullName() + " [ID:" + toCustomer.getId() + "] deposited $" + String.format("%2f", amount) + " to " + toAccount.getType() + " [ID=" + toAccount.getAccountNumber() +"]");
+                                fh.appendLog("EPMB_Transactions", toCustomer.getFullName() + " [ID=" + toCustomer.getId() + "] deposited $" + amountStr + " to " + toAccount.getType() + " [ID=" + toAccount.getAccountNumber() +"]");
                             }
                         } else err = err3;
                     } else err = err2;

@@ -32,6 +32,7 @@ public class CustomerInterface extends UserInterface{
                 case "a":
                     // get user's name, then handle that user
                     Customer customer = this.getUserName(scan, true,false, false, fh);
+
                     handleExistingCustomer(customer, scan, fh);
                     return;
                 case "b":

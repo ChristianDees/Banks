@@ -95,6 +95,7 @@ public abstract class UserInterface {
                         if (viewAccounts)
                             // print accounts if given
                             customer.viewAccounts(viewBalance);
+                        fh.appendLog("EPMB_Transactions", customer.getFullName() + " logged in.");
                         return customer;
                     } else continue;
                 }

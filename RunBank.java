@@ -19,7 +19,7 @@ public class RunBank {
      */
     public static void main(String[] args) {
         FileHandler fh = new FileHandler();
-        fh.getCustomersFromCSV("BankUsers"); // change to EPMB_REPORT SO ITS CONSISTENT
+        fh.getCustomersFromCSV("BankUsers");
         MainInterface ui = new MainInterface();
         ui.displayWelcomeMessage();
         ui.mainMenu();

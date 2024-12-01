@@ -43,6 +43,7 @@ public class MainInterface extends UserInterface{
             case "manager":
                 // enact manager interface
                 ManagerInterface mi = new ManagerInterface();
+                fh.appendLog("EPMB_Transactions", "Manager logged in.");
                 mi.handleManager(scan, fh);
                 break;
             case "exit":
